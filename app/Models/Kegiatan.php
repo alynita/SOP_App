@@ -15,7 +15,8 @@ class Kegiatan extends Model
         'kelengkapan',
         'waktu',
         'output',
-        'keterangan'
+        'keterangan',
+        'tipe'
     ];
 
     // 🔥 RELASI KE SOP

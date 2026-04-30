@@ -171,19 +171,28 @@ class SopController extends Controller
             'pencatatans'
         ])->findOrFail($id);
 
-        $pelaksanas = Pelaksana::all();
+        $pelaksanas = \App\Models\Pelaksana::whereIn('id', 
+            \DB::table('kegiatan_pelaksana')
+                ->join('kegiatan', 'kegiatan.id', '=', 'kegiatan_pelaksana.kegiatan_id')
+                ->where('kegiatan.sop_id', $sop->id)
+                ->pluck('pelaksana_id')
+        )->get();
 
         return view('sop.show', compact('sop', 'pelaksanas'));
     }
 
     public function dashboard()
     {
-        return view('sop.dashboard', [
-            'total' => Sop::count(),
-            'aktif' => Sop::count(), // nanti bisa pakai status
-            'draft' => 0,
-            'sops' => Sop::latest()->take(5)->get()
-        ]);
+        $total = Sop::count();
+
+        // kalau BELUM pakai status, skip dulu
+        $aktif = 0;
+        $draft = 0;
+
+        // 🔥 INI YANG KAMU KURANGIN
+        $sops = Sop::latest()->take(5)->get();
+
+        return view('sop.dashboard', compact('total', 'aktif', 'draft', 'sops'));
     }
 
     public function index(Request $request)
@@ -312,22 +321,61 @@ class SopController extends Controller
                     'waktu' => $request->waktu[$i] ?? null,
                     'output' => $request->output[$i] ?? null,
                     'keterangan' => $request->keterangan[$i] ?? null,
-                    'tipe' => 'proses'
+                    'tipe' => !empty($request->tipe[$i]) ? $request->tipe[$i] : 'proses'
                 ]);
 
-                // simpan pelaksana sesuai index
-                if (isset($request->pelaksana[$i])) {
-                    $kegiatan->pelaksana()->sync($request->pelaksana[$i]);
+                $pelaksanaIds = [];
+
+                // =======================
+                // 1. DARI CHECKBOX
+                if (isset($request->pelaksana[$i]) && is_array($request->pelaksana[$i])) {
+                    foreach ($request->pelaksana[$i] as $idPelaksana) {
+                        if (!empty($idPelaksana)) {
+                            $pelaksanaIds[] = $idPelaksana;
+                        }
+                    }
+                }
+
+                // =======================
+                // 2. DARI INPUT MANUAL
+                if (isset($request->pelaksana_baru[$i])) {
+
+                    $inputBaru = implode(',', $request->pelaksana_baru[$i]);
+                    $listBaru = explode(',', $inputBaru);
+
+                    foreach ($listBaru as $namaBaru) {
+                        $namaBaru = trim($namaBaru);
+
+                        if ($namaBaru) {
+
+                            $existing = Pelaksana::where('nama', $namaBaru)->first();
+
+                            if ($existing) {
+                                $pelaksanaIds[] = $existing->id;
+                            } else {
+                                $baru = Pelaksana::create([
+                                    'nama' => $namaBaru
+                                ]);
+
+                                $pelaksanaIds[] = $baru->id;
+                            }
+                        }
+                    }
+                }
+
+                // =======================
+                // 3. BERSIHKAN
+                $pelaksanaIds = array_filter($pelaksanaIds);
+                $pelaksanaIds = array_values($pelaksanaIds);
+
+                // =======================
+                // 4. SIMPAN
+                if (!empty($pelaksanaIds)) {
+                    $kegiatan->pelaksana()->sync($pelaksanaIds);
                 }
             }
         }
 
         return redirect('/sop/' . $id);
-    }
-
-    public function diagram($id)
-    {
-        $sop = Sop::with('kegiatan')->findOrFail($id);
-        return view('sop.diagram', compact('sop'));
     }
 }

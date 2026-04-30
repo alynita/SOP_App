@@ -1,7 +1,22 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SopController;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+/* ================= DASHBOARD BIASA ================= */
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('dashboard');
+
+/* ================= DASHBOARD MUTU ================= */
+Route::get('/dashboard-mutu', [DashboardController::class, 'mutu'])
+    ->middleware(['auth']);
 
 // INPUT SOP (STEP 1)
 Route::get('/', [SopController::class, 'create']);
@@ -42,3 +57,12 @@ Route::get('/sop/{id}', [SopController::class, 'show']);
 Route::get('/sop/{id}/edit', [SopController::class, 'edit']);
 Route::post('/sop/{id}/update', [SopController::class, 'update']);
 Route::get('/sop/{id}/delete', [SopController::class, 'delete']);
+
+/* ================= PROFILE ================= */
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';
