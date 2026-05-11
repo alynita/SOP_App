@@ -38,10 +38,6 @@
     <td>Tanggal Efektif</td>
     <td><input type="date" name="tgl_efektif" class="form-control form-control-sm"></td>
 </tr>
-<tr>
-    <td>Disahkan Oleh</td>
-    <td><input type="text" name="disahkan_oleh" class="form-control form-control-sm"></td>
-</tr>
 </table>
 
 <button class="btn btn-dark btn-sm">Next</button>

@@ -15,6 +15,28 @@ use App\Models\Pelaksana;
 
 class SopController extends Controller
 {
+    public function dashboard()
+    {
+        $userId = auth()->id(); // 🔥 ambil user login
+
+        $total = Sop::where('user_id', $userId)->count();
+
+        $aktif = Sop::where('user_id', $userId)
+                    ->where('status', 'disetujui')
+                    ->count();
+
+        $draft = Sop::where('user_id', $userId)
+                    ->where('status', 'draft')
+                    ->count();
+
+        $sops = Sop::where('user_id', $userId)
+                    ->latest()
+                    ->take(5)
+                    ->get();
+
+        return view('sop.dashboard', compact('total', 'aktif', 'draft', 'sops'));
+    }
+
     // STEP 1 - FORM SOP
     public function create()
     {
@@ -24,7 +46,11 @@ class SopController extends Controller
     // SIMPAN STEP 1
     public function store(Request $request)
     {
-        $sop = Sop::create($request->all());
+        $data = $request->all();
+        $data['status'] = 'draft';
+        $data['user_id'] = auth()->id(); // 🔥 penting
+
+        $sop = Sop::create($data);
 
         // 👉 lanjut ke dasar hukum
         return redirect('/sop/' . $sop->id . '/dasar-hukum');
@@ -176,34 +202,93 @@ class SopController extends Controller
                 ->join('kegiatan', 'kegiatan.id', '=', 'kegiatan_pelaksana.kegiatan_id')
                 ->where('kegiatan.sop_id', $sop->id)
                 ->pluck('pelaksana_id')
-        )->get();
+        )
+        ->orderBy('urutan', 'asc') // 🔥 INI KUNCINYA
+        ->get();
 
         return view('sop.show', compact('sop', 'pelaksanas'));
-    }
-
-    public function dashboard()
-    {
-        $total = Sop::count();
-
-        // kalau BELUM pakai status, skip dulu
-        $aktif = 0;
-        $draft = 0;
-
-        // 🔥 INI YANG KAMU KURANGIN
-        $sops = Sop::latest()->take(5)->get();
-
-        return view('sop.dashboard', compact('total', 'aktif', 'draft', 'sops'));
     }
 
     public function index(Request $request)
     {
         $search = $request->search;
+        $userId = auth()->id(); // 🔥 ambil user login
 
-        $sops = Sop::where('nama_sop', 'like', "%$search%")
-                    ->orWhere('no_sop', 'like', "%$search%")
+        $sops = Sop::where('user_id', $userId)
+                    ->where(function ($query) use ($search) {
+                        $query->where('nama_sop', 'like', "%$search%")
+                            ->orWhere('no_sop', 'like', "%$search%");
+                    })
                     ->get();
 
         return view('sop.index', compact('sops'));
+    }
+
+    public function proses()
+    {
+        $sops = Sop::all();
+
+        return view('sop.proses', compact('sops'));
+    }
+
+    public function editKegiatan($id)
+    {
+        $sop = Sop::with('kegiatan.pelaksana')->findOrFail($id);
+
+        $pelaksana = Pelaksana::all();
+
+        return view(
+            'sop.kegiatan_edit',
+            compact('sop', 'pelaksana')
+        );
+    }
+
+    public function updateKegiatan(Request $request, $id)
+    {
+        $sop = Sop::findOrFail($id);
+
+        // hapus lama
+        $sop->kegiatan()->delete();
+
+        // input ulang
+        foreach($request->nama_kegiatan as $i => $nama){
+
+            $kegiatan = Kegiatan::create([
+                'sop_id' => $sop->id,
+                'no_urutan' => $i + 1,
+                'nama_kegiatan' => $nama,
+                'kelengkapan' => $request->kelengkapan[$i] ?? null,
+                'waktu' => $request->waktu[$i] ?? null,
+                'output' => $request->output[$i] ?? null,
+                'keterangan' => $request->keterangan[$i] ?? null,
+                'tipe' => $request->tipe[$i],
+            ]);
+
+            // pelaksana lama
+            if(isset($request->pelaksana[$i])){
+                $kegiatan->pelaksana()->attach(
+                    $request->pelaksana[$i]
+                );
+            }
+        }
+
+        return redirect('/proses-sop')
+            ->with('success', 'Proses SOP berhasil diupdate');
+    }
+
+    public function approve($id)
+    {
+        $sop = Sop::findOrFail($id);
+
+        $user = auth()->user(); // 🔥 timker 4
+
+        $sop->status = 'disetujui';
+        $sop->disahkan_oleh = $user->name;
+        $sop->nip_pengesah = $user->nip; // 🔥 tambahin ini
+
+        $sop->save();
+
+        return back()->with('success', 'SOP disetujui');
     }
 
     public function edit($id)
@@ -296,6 +381,16 @@ class SopController extends Controller
         return redirect('/sop')->with('success', 'Data berhasil dihapus');
     }
 
+    public function submit($id)
+    {
+        $sop = Sop::findOrFail($id);
+
+        $sop->status = 'diajukan';
+        $sop->save();
+
+        return redirect('/sop')->with('success', 'SOP berhasil diajukan');
+    }
+
     public function kegiatan($id)
     {
         $sop = Sop::findOrFail($id);
@@ -321,7 +416,9 @@ class SopController extends Controller
                     'waktu' => $request->waktu[$i] ?? null,
                     'output' => $request->output[$i] ?? null,
                     'keterangan' => $request->keterangan[$i] ?? null,
-                    'tipe' => !empty($request->tipe[$i]) ? $request->tipe[$i] : 'proses'
+                    'tipe' => !empty($request->tipe[$i]) ? $request->tipe[$i] : 'proses',
+                    'next_yes' => $request->next_yes[$i] ?? null,
+                    'next_no'  => $request->next_no[$i] ?? null,
                 ]);
 
                 $pelaksanaIds = [];

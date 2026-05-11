@@ -1,64 +1,83 @@
 <section>
-    <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('Profile Information') }}
-        </h2>
 
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __("Update your account's profile information and email address.") }}
+    <header class="mb-3">
+
+        <h5 class="fw-bold text-dark">
+            Profile Information
+        </h5>
+
+        <p class="text-muted small">
+            Update informasi akun dan email kamu.
         </p>
+
     </header>
 
-    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
+    <!-- FORM EMAIL VERIFICATION -->
+    <form id="send-verification" method="POST" action="{{ route('verification.send') }}">
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <!-- FORM UTAMA -->
+    <form method="POST" action="{{ route('profile.update') }}">
+
         @csrf
-        @method('patch')
+        @method('PATCH')
 
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+        <!-- NAME -->
+        <div class="mb-3">
+
+            <label class="form-label">Name</label>
+
+            <input type="text"
+                name="name"
+                value="{{ old('name', $user->name) }}"
+                class="form-control"
+                required
+                autofocus>
+
         </div>
 
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+        <!-- EMAIL -->
+        <div class="mb-3">
 
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div>
-                    <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
-                        {{ __('Your email address is unverified.') }}
+            <label class="form-label">Email</label>
 
-                        <button form="send-verification" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                            {{ __('Click here to re-send the verification email.') }}
-                        </button>
-                    </p>
+            <input type="email"
+                name="email"
+                value="{{ old('email', $user->email) }}"
+                class="form-control"
+                required>
 
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
-                            {{ __('A new verification link has been sent to your email address.') }}
-                        </p>
-                    @endif
-                </div>
-            @endif
         </div>
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+        <!-- UNVERIFIED NOTICE -->
+        @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
 
-            @if (session('status') === 'profile-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600 dark:text-gray-400"
-                >{{ __('Saved.') }}</p>
-            @endif
-        </div>
+            <div class="alert alert-warning">
+
+                <p class="mb-2">
+                    Email kamu belum terverifikasi.
+                </p>
+
+                <button form="send-verification" class="btn btn-link p-0">
+                    Kirim ulang verifikasi email
+                </button>
+
+                @if (session('status') === 'verification-link-sent')
+                    <div class="text-success mt-2">
+                        Link verifikasi sudah dikirim.
+                    </div>
+                @endif
+
+            </div>
+
+        @endif
+
+        <!-- BUTTON -->
+        <button type="submit" class="btn btn-success">
+            Save
+        </button>
+
     </form>
+
 </section>

@@ -19,8 +19,35 @@ class DashboardController extends Controller
         return view('sop.dashboard', compact('total', 'aktif', 'draft', 'sops'));
     }
 
-    public function mutu()
+    public function dashboardTimker4()
     {
-        return view('dashboard-mutu');
+        return view('dashboard.timker4', [
+            'total' => Sop::count(),
+            'menunggu' => Sop::where('status', 'diajukan')->count(),
+            'disetujui' => Sop::where('status', 'disetujui')->count(),
+            'ditolak' => Sop::where('status', 'ditolak')->count(),
+
+            'sopMasuk' => Sop::where('status', 'diajukan')
+                ->latest()
+                ->get()
+        ]);
+    }
+
+    public function approve($id)
+    {
+        $sop = Sop::find($id);
+        $sop->status = 'disetujui';
+        $sop->save();
+
+        return back()->with('success', 'SOP disetujui');
+    }
+
+    public function reject($id)
+    {
+        $sop = Sop::find($id);
+        $sop->status = 'ditolak';
+        $sop->save();
+
+        return back()->with('success', 'SOP ditolak');
     }
 }

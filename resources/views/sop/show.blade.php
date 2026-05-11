@@ -6,55 +6,65 @@
 .sop-table td, .sop-table th {
     border: 1px solid black;
     padding: 5px;
-    vertical-align: top;
     font-size: 12px;
 }
 
-.flow-cell {
+.flow-cell{
     position: relative;
-    height: 180px;
-    text-align: center;
+    width: 120px;
+    height: 120px;
+    text-align:center;
+    vertical-align:middle;
 }
 
-.flow.proses {
-    width: 60px;
-    height: 30px;
-    border: 2px solid black;
-    position: absolute;
-    top: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: white;
+.flow-node{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    z-index:20;
+    background:white;
 }
 
-.flow.start, .flow.end {
-    border-radius: 20px;
-    line-height: 30px;
-    font-size: 10px;
+/* PROCESS */
+.flow-process{
+    width:60px;
+    height:30px;
+    border:2px solid black;
 }
 
-.flow.decision {
-    width: 40px;
-    height: 40px;
-    border: 2px solid black;
-    transform: translate(-50%, 0) rotate(45deg);
-    position: absolute;
-    top: 40px;
-    left: 50%;
-    background: white;
+/* START END */
+.flow-start,
+.flow-end{
+    width:70px;
+    height:30px;
+    border:2px solid black;
+    border-radius:20px;
+    line-height:26px;
+    font-size:11px;
 }
 
-th {
-    text-align: center;
-    vertical-align: middle;
+/* DECISION */
+.flow-decision{
+    width:40px;
+    height:40px;
+    border:2px solid black;
+    transform:translate(-50%, -50%) rotate(45deg);
 }
 
-.leader-line {
-    z-index: 9999 !important;
+/* SVG */
+#flow-wrapper{
+    position:relative;
 }
 
-#flow-table td {
-    min-width: 200px; /* 🔥 bikin kolom lebih lebar */
+#flow-svg{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:5;
 }
 </style>
 
@@ -100,8 +110,8 @@ th {
                             <td colspan="2" class="text-center">
                                 Kepala BBPK Jakarta
                                 <br><br><br><br>
-                                <b>{{ $sop->disahkan_oleh }}</b><br>
-                                NIP. ....................
+                                <b>{{ $sop->disahkan_oleh ?? '-' }}</b><br>
+                                NIP. {{ $sop->nip_pengesah ?? '-' }}
                             </td>
                         </tr>
                         <tr>
@@ -177,11 +187,17 @@ th {
     
     </table>
     
+    @if($sop->kegiatan->count() > 0)
+
     <br>
-    
-    <div id="flow-wrapper">
-        
-    <table class="table table-bordered">
+
+    <div id="flow-wrapper" style="position:relative;">
+
+    <svg id="flow-svg" 
+        style="position:absolute; top:0; left:0; width:100%; height:100%; min-height:1000px; pointer-events:none;">
+    </svg>
+
+    <table id="flow-table" class="table table-bordered">
         <thead>
             <tr>
                 <th rowspan="2">No</th>
@@ -218,202 +234,532 @@ th {
                 @php $nodeId = "node-{$k->id}-{$p->id}"; @endphp
                 
                 @if($k->tipe == 'start')
-                <div id="{{ $nodeId }}" class="flow proses start">Mulai</div>
+                <div id="{{ $nodeId }}" class="flow-node flow-start"></div>
 
                 @elseif($k->tipe == 'end')
-                <div id="{{ $nodeId }}" class="flow proses end">Selesai</div>
+                <div id="{{ $nodeId }}" class="flow-node flow-end"></div>
 
                 @elseif($k->tipe == 'decision')
-                <div id="{{ $nodeId }}" class="flow decision"></div>
+                <div id="{{ $nodeId }}" class="flow-node flow-decision"></div>
 
                 @else
-                <div id="{{ $nodeId }}" class="flow proses"></div>
+                <div id="{{ $nodeId }}" class="flow-node flow-process"></div>
                 @endif
                 
                 @endif
             </td>
             @endforeach
-
-<td>{{ $k->kelengkapan }}</td>
-<td>{{ $k->waktu }}</td>
-<td>{{ $k->output }}</td>
-<td>{{ $k->keterangan ?? '-' }}</td>
-
-</tr>
-@endforeach
-</tbody>
-
+            
+            <td>{{ $k->kelengkapan }}</td>
+            <td>{{ $k->waktu }}</td>
+            <td>{{ $k->output }}</td>
+            <td>{{ $k->keterangan ?? '-' }}</td>
+        </tr>
+        @endforeach
+    </tbody>
 </table>
 </div>
+@endif
 
 </div>
 </div>
-
-{{-- ================= LEADERLINE ================= --}}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.7/leader-line.min.js"></script>
 
 <script>
-window.addEventListener("load", function () {
 
-    function createMidPoint(x, y) {
-        let el = document.createElement('div');
-        el.style.position = 'absolute';
-        el.style.left = x + 'px';
-        el.style.top = y + 'px';
-        el.style.width = '1px';
-        el.style.height = '1px';
-        document.body.appendChild(el);
-        return el;
+window.addEventListener("load", () => {
+
+    const svg = document.getElementById("flow-svg");
+    const wrapper = document.getElementById("flow-wrapper");
+
+    const GAP = 6;
+
+    // JARAK LOOP
+    const LOOP_OFFSET = 180;
+
+    // =========================
+    // GET NODE
+    // =========================
+    function getNode(id){
+        return document.querySelector(`[id^="node-${id}-"]`);
     }
 
-let kegiatanNodes = {};
-let kegiatanFirstNode = {};
+    // =========================
+    // CLEAR SVG
+    // =========================
+    function clearSvg(){
+        svg.innerHTML = '';
+    }
 
-/* ===============================
-   SIMPAN SEMUA NODE PER KEGIATAN
-=============================== */
-@foreach($sop->kegiatan as $k)
-kegiatanNodes[{{ $k->id }}] = [
-    @foreach($k->pelaksana as $p)
-    document.getElementById("node-{{ $k->id }}-{{ $p->id }}"),
-    @endforeach
-].filter(n => n);
+    // =========================
+    // RESIZE SVG
+    // =========================
+    function resizeSvg(){
 
-kegiatanFirstNode[{{ $k->id }}] = kegiatanNodes[{{ $k->id }}][0] ?? null;
-@endforeach
+        svg.setAttribute(
+            "width",
+            wrapper.scrollWidth
+        );
 
+        svg.setAttribute(
+            "height",
+            wrapper.scrollHeight
+        );
 
-/* ===============================
-   FLOW NORMAL ANTAR KEGIATAN
-=============================== */
-@foreach($sop->kegiatan as $index => $k)
+        svg.style.width =
+            wrapper.scrollWidth + 'px';
 
-@if($k->tipe != 'decision' && isset($sop->kegiatan[$index+1]))
-if(kegiatanFirstNode[{{ $k->id }}] && kegiatanFirstNode[{{ $sop->kegiatan[$index+1]->id }}]){
-    new LeaderLine(
-        kegiatanFirstNode[{{ $k->id }}],
-        kegiatanFirstNode[{{ $sop->kegiatan[$index+1]->id }}],
-        {
-            color: 'black',
-            size: 2,
-            path: 'grid',
-            startSocket: 'bottom',
-            endSocket: 'top',
-            endPlug: 'arrow'
+        svg.style.height =
+            wrapper.scrollHeight + 'px';
+    }
+
+    // =========================
+    // SVG DEFS
+    // =========================
+    function createDefs(){
+
+        const defs = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "defs"
+        );
+
+        const marker = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "marker"
+        );
+
+        marker.setAttribute("id", "arrow");
+        marker.setAttribute("markerWidth", "8");
+        marker.setAttribute("markerHeight", "8");
+        marker.setAttribute("refX", "6");
+        marker.setAttribute("refY", "3");
+        marker.setAttribute("orient", "auto");
+        marker.setAttribute("markerUnits", "strokeWidth");
+
+        const arrow = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "path"
+        );
+
+        arrow.setAttribute(
+            "d",
+            "M0,0 L0,6 L6,3 z"
+        );
+
+        arrow.setAttribute(
+            "fill",
+            "#000"
+        );
+
+        marker.appendChild(arrow);
+
+        defs.appendChild(marker);
+
+        svg.appendChild(defs);
+    }
+
+    // =========================
+    // GET RECT
+    // =========================
+    function getRect(el){
+
+        const parent =
+            wrapper.getBoundingClientRect();
+
+        const rect =
+            el.getBoundingClientRect();
+
+        return {
+
+            left:
+                rect.left - parent.left,
+
+            right:
+                rect.right - parent.left,
+
+            top:
+                rect.top - parent.top,
+
+            bottom:
+                rect.bottom - parent.top,
+
+            centerX:
+                rect.left +
+                rect.width / 2 -
+                parent.left,
+
+            centerY:
+                rect.top +
+                rect.height / 2 -
+                parent.top
+        };
+    }
+
+    // =========================
+    // CREATE PATH
+    // =========================
+    function createPath(d){
+
+        const path =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "path"
+            );
+
+        path.setAttribute("d", d);
+
+        path.setAttribute(
+            "fill",
+            "none"
+        );
+
+        path.setAttribute(
+            "stroke",
+            "#000"
+        );
+
+        path.setAttribute(
+            "stroke-width",
+            "1.5"
+        );
+
+        path.setAttribute(
+            "stroke-linecap",
+            "square"
+        );
+
+        path.setAttribute(
+            "stroke-linejoin",
+            "miter"
+        );
+
+        path.setAttribute(
+            "marker-end",
+            "url(#arrow)"
+        );
+
+        svg.appendChild(path);
+    }
+
+    // =========================
+    // CREATE LABEL
+    // =========================
+    function createLabel(x, y, text){
+
+        const label =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "text"
+            );
+
+        label.setAttribute("x", x);
+
+        label.setAttribute("y", y);
+
+        label.setAttribute(
+            "font-size",
+            "11"
+        );
+
+        label.setAttribute(
+            "font-family",
+            "Arial"
+        );
+
+        label.setAttribute(
+            "font-weight",
+            "600"
+        );
+
+        label.textContent = text;
+
+        svg.appendChild(label);
+    }
+
+    // =========================
+    // PANAH BOLAK BALIK
+    // =========================
+    function drawTwoWay(from, to){
+
+        if(!from || !to) return;
+
+        const a = getRect(from);
+        const b = getRect(to);
+
+        const y = a.centerY;
+
+        // KE KANAN
+        const path1 = `
+            M ${a.right} ${y - 8}
+            L ${b.left} ${y - 8}
+        `;
+
+        createPath(path1);
+
+        // KE KIRI
+        const path2 = `
+            M ${b.left} ${y + 8}
+            L ${a.right} ${y + 8}
+        `;
+
+        createPath(path2);
+    }
+
+    // =========================
+    // FLOW NORMAL
+    // =========================
+    function drawNormal(from, to){
+
+        if(!from || !to) return;
+
+        const a = getRect(from);
+        const b = getRect(to);
+
+        const x1 = a.centerX;
+        const y1 = a.bottom - GAP;
+
+        const x2 = b.centerX;
+        const y2 = b.top + GAP;
+
+        const midY = (y1 + y2) / 2;
+
+        const d = `
+            M ${x1} ${y1}
+            L ${x1} ${midY}
+            L ${x2} ${midY}
+            L ${x2} ${y2}
+        `;
+
+        createPath(d);
+    }
+
+    // =========================
+    // DECISION YES
+    // =========================
+    function drawYes(from, to){
+
+        if(!from || !to) return;
+
+        const a = getRect(from);
+        const b = getRect(to);
+
+        const x1 = a.centerX;
+        const y1 = a.bottom - GAP;
+
+        const x2 = b.centerX;
+        const y2 = b.top + GAP;
+
+        const midY = (y1 + y2) / 2;
+
+        const d = `
+            M ${x1} ${y1}
+            L ${x1} ${midY}
+            L ${x2} ${midY}
+            L ${x2} ${y2}
+        `;
+
+        createPath(d);
+
+        createLabel(
+            x1 + 10,
+            y1 + 15,
+            'Ya'
+        );
+    }
+
+    // =========================
+    // DECISION NO
+    // =========================
+    function drawNo(from, to, side = 'right'){
+
+        if(!from || !to) return;
+
+        const a = getRect(from);
+        const b = getRect(to);
+
+        // =========================
+        // LOOP KANAN
+        // =========================
+        if(side === 'right'){
+
+            const x1 = a.right;
+            const y1 = a.centerY;
+
+            const x2 = b.centerX;
+            const y2 = b.top + GAP;
+
+            const loopX =
+                Math.max(x1, x2)
+                + LOOP_OFFSET;
+
+            const d = `
+                M ${x1} ${y1}
+                L ${loopX} ${y1}
+                L ${loopX} ${y2}
+                L ${x2} ${y2}
+            `;
+
+            createPath(d);
+
+            createLabel(
+                x1 + 15,
+                y1 - 10,
+                'Tidak'
+            );
+
+            return;
         }
+
+        // =========================
+        // LOOP KIRI
+        // =========================
+        const x1 = a.left;
+        const y1 = a.centerY;
+
+        const x2 = b.centerX;
+        const y2 = b.top + GAP;
+
+        const loopX =
+            Math.min(x1, x2)
+            - LOOP_OFFSET;
+
+        const d = `
+            M ${x1} ${y1}
+            L ${loopX} ${y1}
+            L ${loopX} ${y2}
+            L ${x2} ${y2}
+        `;
+
+        createPath(d);
+
+        createLabel(
+            x1 - 45,
+            y1 - 10,
+            'Tidak'
+        );
+    }
+
+    // =========================
+    // RENDER
+    // =========================
+    function render(){
+
+        clearSvg();
+
+        resizeSvg();
+
+        createDefs();
+
+        // =========================
+        // ANTAR PELAKSANA
+        // =========================
+        @foreach($sop->kegiatan as $k)
+
+            @if($k->pelaksana->count() > 1)
+
+                @php
+                    $pel = $k->pelaksana->values();
+                @endphp
+
+                drawTwoWay(
+                    document.querySelector(
+                        '#node-{{ $k->id }}-{{ $pel[0]->id }}'
+                    ),
+                    document.querySelector(
+                        '#node-{{ $k->id }}-{{ $pel[1]->id }}'
+                    )
+                );
+
+            @endif
+
+        @endforeach
+
+        // =========================
+        // FLOW NORMAL
+        // =========================
+        @foreach($sop->kegiatan as $index => $k)
+
+            @if($index < count($sop->kegiatan)-1)
+
+                @php
+                    $next =
+                    $sop->kegiatan[$index+1];
+                @endphp
+
+                @if($k->tipe != 'decision')
+
+                    drawNormal(
+                        getNode({{ $k->id }}),
+                        getNode({{ $next->id }})
+                    );
+
+                @endif
+
+            @endif
+
+        @endforeach
+
+        // =========================
+        // FLOW DECISION OTOMATIS
+        // =========================
+
+        @php
+            $decisionCounter = 0;
+        @endphp
+
+        @foreach($sop->kegiatan as $index => $k)
+
+            @if($k->tipe == 'decision')
+
+                @php
+                    $decisionCounter++;
+
+                    $side =
+                        $decisionCounter % 2 == 1
+                        ? 'right'
+                        : 'left';
+
+                    $next = $sop->kegiatan[$index + 1] ?? null;
+                    $prev = $sop->kegiatan[$index - 1] ?? null;
+                @endphp
+
+                const decision{{ $k->id }} =
+                    getNode({{ $k->id }});
+
+                // YA
+                @if($next)
+
+                    drawYes(
+                        decision{{ $k->id }},
+                        getNode({{ $next->id }})
+                    );
+
+                @endif
+
+                // TIDAK
+                @if($prev)
+
+                    drawNo(
+                        decision{{ $k->id }},
+                        getNode({{ $prev->id }}),
+                        '{{ $side }}'
+                    );
+
+                @endif
+
+            @endif
+
+        @endforeach
+    }
+
+    render();
+
+    window.addEventListener(
+        "resize",
+        render
     );
-}
-@endif
-
-@endforeach
-
-
-/* ===============================
-   MULTI PELAKSANA (KIRI-KANAN)
-=============================== */
-Object.values(kegiatanNodes).forEach(row => {
-
-    if (row.length > 1) {
-
-        for (let i = 0; i < row.length; i++) {
-            for (let j = i + 1; j < row.length; j++) {
-
-                let a = row[i];
-                let b = row[j];
-
-                if(a && b){
-
-                    // A → B
-                    new LeaderLine(a, b, {
-                        color: 'black',
-                        size: 2,
-                        path: 'straight',
-                        startSocket: 'right',
-                        endSocket: 'left',
-                        startSocketGravity: -30,
-                        endSocketGravity: -30,
-                        endPlug: 'arrow'
-                    });
-
-                    // B → A
-                    new LeaderLine(b, a, {
-                        color: 'black',
-                        size: 2,
-                        path: 'straight',
-                        startSocket: 'left',
-                        endSocket: 'right',
-                        startSocketGravity: 30,
-                        endSocketGravity: 30,
-                        endPlug: 'arrow'
-                    });
-
-                }
-            }
-        }
-
-    }
 
 });
 
-
-/* ===============================
-   DECISION YA / TIDAK
-=============================== */
-@foreach($sop->kegiatan as $k)
-
-@if($k->tipe == 'decision')
-
-let decisionNode{{ $k->id }} = kegiatanFirstNode[{{ $k->id }}];
-
-@if($k->next_yes)
-let yesTarget{{ $k->id }} = kegiatanFirstNode[{{ $k->next_yes }}];
-
-if(decisionNode{{ $k->id }} && yesTarget{{ $k->id }}){
-
-    new LeaderLine(
-        decisionNode{{ $k->id }},
-        yesTarget{{ $k->id }},
-        {
-            color: 'black',
-            size: 2,
-            path: 'grid',
-            startSocket: 'right',   // 👉 selalu ke kanan
-            endSocket: 'top',
-            endPlug: 'arrow',
-            middleLabel: LeaderLine.captionLabel('Ya')
-        }
-    );
-}
-@endif
-
-
-@if($k->next_no)
-let noTarget{{ $k->id }} = kegiatanFirstNode[{{ $k->next_no }}];
-
-if(decisionNode{{ $k->id }} && noTarget{{ $k->id }}){
-
-    new LeaderLine(
-        decisionNode{{ $k->id }},
-        noTarget{{ $k->id }},
-        {
-            color: 'red', // 🔥 sementara biar keliatan
-            size: 2,
-            path: 'grid',
-            startSocket: 'left',
-            endSocket: 'top', // 🔥 ganti ini
-            startSocketGravity: [-200, 0],
-            endSocketGravity: [0, -30],
-            endPlug: 'arrow',
-            middleLabel: LeaderLine.captionLabel('Tidak')
-        }
-    );
-}
-@endif
-
-@endif
-
-@endforeach
-});
 </script>
 
 @endsection

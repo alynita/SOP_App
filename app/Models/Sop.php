@@ -22,7 +22,9 @@ class Sop extends Model
         'tgl_pembuatan',
         'tgl_revisi',
         'tgl_efektif',
-        'disahkan_oleh'
+        'disahkan_oleh',
+        'status',
+        'user_id'
     ];
 
     // RELASI

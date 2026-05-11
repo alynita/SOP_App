@@ -32,9 +32,6 @@
             <a href="/sop/{{ $sop->id }}" class="btn btn-info btn-sm">Detail</a>
             <a href="/sop/{{ $sop->id }}/edit" class="btn btn-warning btn-sm">Edit</a>
             <a href="/sop/{{ $sop->id }}/delete" class="btn btn-danger btn-sm">Hapus</a>
-            <a href="/sop/{{ $sop->id }}/kegiatan" class="btn btn-sm btn-primary">
-                Proses
-            </a>
         </td>
     </tr>
     @endforeach

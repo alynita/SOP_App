@@ -53,6 +53,7 @@
                 <th>Nama SOP</th>
                 <th>Tanggal</th>
                 <th>Aksi</th>
+                <th>Status</th>
             </tr>
 
             @foreach($sops as $s)
@@ -62,6 +63,17 @@
                 <td>{{ $s->tgl_pembuatan }}</td>
                 <td>
                     <a href="/sop/{{ $s->id }}" class="btn btn-info btn-sm">Lihat</a>
+                </td>
+                <td>
+                    @if($s->status == 'draft')
+                        <span class="badge bg-secondary">Draft</span>
+                    @elseif($s->status == 'diajukan')
+                        <span class="badge bg-warning">Diajukan</span>
+                    @elseif($s->status == 'disetujui')
+                        <span class="badge bg-success">Disetujui</span>
+                    @elseif($s->status == 'ditolak')
+                        <span class="badge bg-danger">Ditolak</span>
+                    @endif
                 </td>
             </tr>
             @endforeach
