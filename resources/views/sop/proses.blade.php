@@ -33,28 +33,49 @@
             @endif
         </td>
 
-        <!-- INI YANG KURANG -->
         <td>
 
-            <a href="/sop/{{ $sop->id }}" class="btn btn-info btn-sm">Detail</a>
-
-            <a href="/sop/{{ $sop->id }}/kegiatan/edit"
-            class="btn btn-warning btn-sm">
-                Edit
+            <a href="/sop/{{ $sop->id }}"
+            class="btn btn-info btn-sm">
+                Detail
             </a>
 
+            {{-- STATUS DRAFT / DITOLAK --}}
             @if($sop->status == 'draft' || $sop->status == 'ditolak')
 
-            <form action="/sop/{{ $sop->id }}/submit"
-                method="POST"
-                style="display:inline;">
-                @csrf
+                {{-- BELUM ADA KEGIATAN --}}
+                @if($sop->kegiatan->count() == 0)
 
-                <button class="btn btn-success btn-sm">
-                    Ajukan
-                </button>
+                    <a href="/sop/{{ $sop->id }}/kegiatan"
+                    class="btn btn-primary btn-sm">
+                        Proses
+                    </a>
 
-            </form>
+                {{-- SUDAH ADA KEGIATAN --}}
+                @else
+
+                    <a href="/sop/{{ $sop->id }}/kegiatan/edit"
+                    class="btn btn-warning btn-sm">
+                        Edit Proses
+                    </a>
+
+                @endif
+
+                {{-- AJUKAN --}}
+                @if($sop->kegiatan->count() > 0)
+
+                <form action="/sop/{{ $sop->id }}/submit"
+                    method="POST"
+                    style="display:inline;">
+                    @csrf
+
+                    <button class="btn btn-success btn-sm">
+                        Ajukan
+                    </button>
+
+                </form>
+
+                @endif
 
             @endif
 

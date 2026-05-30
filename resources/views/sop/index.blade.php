@@ -14,8 +14,6 @@
         <th>No</th>
         <th>No SOP</th>
         <th>Tanggal Pembuatan</th>
-        <th>Tanggal Revisi</th>
-        <th>Tanggal Efektif</th>
         <th>Nama SOP</th>
         <th>Aksi</th>
     </tr>
@@ -25,8 +23,6 @@
         <td>{{ $loop->iteration }}</td>
         <td>{{ $sop->no_sop }}</td>
         <td>{{ $sop->tgl_pembuatan }}</td>
-        <td>{{ $sop->tgl_revisi }}</td>
-        <td>{{ $sop->tgl_efektif }}</td>
         <td>{{ $sop->nama_sop }}</td>
         <td>
             <a href="/sop/{{ $sop->id }}" class="btn btn-info btn-sm">Detail</a>

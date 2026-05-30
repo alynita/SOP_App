@@ -42,12 +42,20 @@ class DashboardController extends Controller
         return back()->with('success', 'SOP disetujui');
     }
 
-    public function reject($id)
+    public function reject(Request $request, $id)
     {
-        $sop = Sop::find($id);
+        $sop = Sop::findOrFail($id);
+
         $sop->status = 'ditolak';
+
+        $sop->catatan_revisi =
+            $request->catatan_revisi;
+
         $sop->save();
 
-        return back()->with('success', 'SOP ditolak');
+        return back()->with(
+            'success',
+            'SOP ditolak'
+        );
     }
 }

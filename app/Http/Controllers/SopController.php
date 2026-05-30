@@ -17,7 +17,7 @@ class SopController extends Controller
 {
     public function dashboard()
     {
-        $userId = auth()->id(); // 🔥 ambil user login
+        $userId = auth()->id();
 
         $total = Sop::where('user_id', $userId)->count();
 
@@ -29,12 +29,26 @@ class SopController extends Controller
                     ->where('status', 'draft')
                     ->count();
 
+        $revisi = Sop::where('user_id', $userId)
+                    ->where('status', 'ditolak')
+                    ->count();
+
         $sops = Sop::where('user_id', $userId)
+                    ->where('status', '!=', 'disetujui')
                     ->latest()
                     ->take(5)
                     ->get();
 
-        return view('sop.dashboard', compact('total', 'aktif', 'draft', 'sops'));
+        return view(
+            'sop.dashboard',
+            compact(
+                'total',
+                'aktif',
+                'draft',
+                'revisi',
+                'sops'
+            )
+        );
     }
 
     // STEP 1 - FORM SOP
@@ -289,6 +303,23 @@ class SopController extends Controller
         $sop->save();
 
         return back()->with('success', 'SOP disetujui');
+    }
+
+    public function reject(Request $request, $id)
+    {
+        $sop = Sop::findOrFail($id);
+
+        $sop->status = 'ditolak';
+
+        $sop->catatan_revisi =
+            $request->catatan_revisi;
+
+        $sop->save();
+
+        return back()->with(
+            'success',
+            'SOP berhasil ditolak'
+        );
     }
 
     public function edit($id)

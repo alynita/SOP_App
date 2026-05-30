@@ -99,7 +99,7 @@
 
         <!-- LOGO -->
         <div class="logo">
-            <img src="/logo-kemenkes.png" alt="Logo">
+            <img src="/logo.png" alt="Logo">
             <b>BBPK SOP</b>
         </div>
 

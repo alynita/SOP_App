@@ -77,10 +77,17 @@
         <table class="sop-table w-100">
             <tr>
                 <td width="60%" style="text-align:center;">
-                    <br><br>
+
+                    <img src="{{ asset('logo.png') }}"
+                        width="80"
+                        class="mb-2">
+
+                    <br>
+
                     <b>KEMENTERIAN KESEHATAN REPUBLIK INDONESIA</b><br>
                     SEKRETARIAT JENDERAL<br>
                     BALAI BESAR PELATIHAN KESEHATAN JAKARTA
+
                 </td>
 
                 <!-- KANAN -->
@@ -514,19 +521,36 @@ window.addEventListener("load", () => {
         const a = getRect(from);
         const b = getRect(to);
 
-        const x1 = a.centerX;
-        const y1 = a.bottom - GAP;
+        // =====================================
+        // TITIK AWAL & AKHIR
+        // =====================================
 
-        const x2 = b.centerX;
-        const y2 = b.top + GAP;
+        const startX = a.centerX;
+        const startY = a.bottom;
 
-        const midY = (y1 + y2) / 2;
+        const endX = b.centerX;
+        const endY = b.top;
+
+        // =====================================
+        // MID AREA
+        // =====================================
+
+        const midY = startY + (
+            (endY - startY) / 2
+        );
+
+        // =====================================
+        // PATH
+        // =====================================
 
         const d = `
-            M ${x1} ${y1}
-            L ${x1} ${midY}
-            L ${x2} ${midY}
-            L ${x2} ${y2}
+            M ${startX} ${startY}
+
+            L ${startX} ${midY}
+
+            L ${endX} ${midY}
+
+            L ${endX} ${endY}
         `;
 
         createPath(d);
@@ -567,77 +591,87 @@ window.addEventListener("load", () => {
     }
 
     // =========================
-    // DECISION NO
+    // DECISION NO SMART
     // =========================
-    function drawNo(from, to, side = 'right'){
+    function drawNo(from, to){
 
         if(!from || !to) return;
 
         const a = getRect(from);
         const b = getRect(to);
 
-        // =========================
-        // LOOP KANAN
-        // =========================
-        if(side === 'right'){
+        const startY = a.centerY;
+        const endY = b.centerY;
 
-            const x1 = a.right;
-            const y1 = a.centerY;
+        const targetIsLeft =
+            b.centerX < a.centerX;
 
-            const x2 = b.centerX;
-            const y2 = b.top + GAP;
+        let d = '';
 
-            const loopX =
-                Math.max(x1, x2)
-                + LOOP_OFFSET;
+        // posisi tulisan
+        let labelX = 0;
+        let labelY = startY - 10;
 
-            const d = `
-                M ${x1} ${y1}
-                L ${loopX} ${y1}
-                L ${loopX} ${y2}
-                L ${x2} ${y2}
+        // =====================================
+        // LOOP KIRI
+        // =====================================
+
+        if(targetIsLeft){
+
+            const startX = a.left;
+            const endX = b.right;
+
+            // keluar lebih jauh
+            const loopX = startX - 100;
+
+            d = `
+                M ${startX} ${startY}
+
+                L ${loopX} ${startY}
+
+                L ${loopX} ${endY}
+
+                L ${endX} ${endY}
             `;
 
-            createPath(d);
-
-            createLabel(
-                x1 + 15,
-                y1 - 10,
-                'Tidak'
-            );
-
-            return;
+            // tulisan ikut ke kiri
+            labelX = loopX - 40;
         }
 
-        // =========================
-        // LOOP KIRI
-        // =========================
-        const x1 = a.left;
-        const y1 = a.centerY;
+        // =====================================
+        // LOOP KANAN
+        // =====================================
 
-        const x2 = b.centerX;
-        const y2 = b.top + GAP;
+        else{
 
-        const loopX =
-            Math.min(x1, x2)
-            - LOOP_OFFSET;
+            const startX = a.right;
+            const endX = b.left;
 
-        const d = `
-            M ${x1} ${y1}
-            L ${loopX} ${y1}
-            L ${loopX} ${y2}
-            L ${x2} ${y2}
-        `;
+            // keluar lebih jauh
+            const loopX = startX + 100;
+
+            d = `
+                M ${startX} ${startY}
+
+                L ${loopX} ${startY}
+
+                L ${loopX} ${endY}
+
+                L ${endX} ${endY}
+            `;
+
+            // tulisan ikut ke kanan
+            labelX = loopX + 10;
+        }
 
         createPath(d);
 
         createLabel(
-            x1 - 45,
-            y1 - 10,
+            labelX,
+            labelY,
             'Tidak'
         );
     }
-
     // =========================
     // RENDER
     // =========================
@@ -699,25 +733,13 @@ window.addEventListener("load", () => {
         @endforeach
 
         // =========================
-        // FLOW DECISION OTOMATIS
+        // FLOW DECISION
         // =========================
-
-        @php
-            $decisionCounter = 0;
-        @endphp
-
         @foreach($sop->kegiatan as $index => $k)
 
             @if($k->tipe == 'decision')
 
                 @php
-                    $decisionCounter++;
-
-                    $side =
-                        $decisionCounter % 2 == 1
-                        ? 'right'
-                        : 'left';
-
                     $next = $sop->kegiatan[$index + 1] ?? null;
                     $prev = $sop->kegiatan[$index - 1] ?? null;
                 @endphp
@@ -740,8 +762,7 @@ window.addEventListener("load", () => {
 
                     drawNo(
                         decision{{ $k->id }},
-                        getNode({{ $prev->id }}),
-                        '{{ $side }}'
+                        getNode({{ $prev->id }})
                     );
 
                 @endif

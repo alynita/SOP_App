@@ -79,10 +79,37 @@
                     </form>
 
                     <!-- REJECT -->
-                    <form action="/sop/{{ $s->id }}/reject" method="POST" style="display:inline;">
-                        @csrf
-                        <button class="btn btn-danger btn-sm">Tolak</button>
-                    </form>
+                    <button
+                        type="button"
+                        class="btn btn-danger btn-sm"
+                        onclick="showReject({{ $s->id }})">
+
+                        Tolak
+
+                    </button>
+
+                    <!-- FORM REJECT -->
+                    <div id="reject-form-{{ $s->id }}"
+                        style="display:none; margin-top:5px;">
+
+                        <form action="/sop/{{ $s->id }}/reject"
+                            method="POST">
+
+                            @csrf
+
+                            <textarea
+                                name="catatan_revisi"
+                                class="form-control mb-2"
+                                placeholder="Catatan revisi..."
+                                required></textarea>
+
+                            <button class="btn btn-danger btn-sm">
+                                Simpan Penolakan
+                            </button>
+
+                        </form>
+
+                    </div>
                 </td>
             </tr>
             @endforeach
@@ -91,5 +118,17 @@
 
     </div>
 </div>
+
+<script>
+
+function showReject(id){
+
+    document.getElementById(
+        'reject-form-' + id
+    ).style.display = 'block';
+
+}
+
+</script>
 
 @endsection

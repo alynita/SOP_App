@@ -54,6 +54,7 @@
                 <th>Tanggal</th>
                 <th>Aksi</th>
                 <th>Status</th>
+                <th>Catatan Revisi</th>
             </tr>
 
             @foreach($sops as $s)
@@ -73,6 +74,15 @@
                         <span class="badge bg-success">Disetujui</span>
                     @elseif($s->status == 'ditolak')
                         <span class="badge bg-danger">Ditolak</span>
+                    @endif
+                </td>
+                <td>
+                    @if($s->status == 'ditolak')
+                        <div class="text-danger">
+                            {{ $s->catatan_revisi }}
+                        </div>
+                    @else
+                        -
                     @endif
                 </td>
             </tr>
