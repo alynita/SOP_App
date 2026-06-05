@@ -25,9 +25,25 @@
         <td>{{ $sop->tgl_pembuatan }}</td>
         <td>{{ $sop->nama_sop }}</td>
         <td>
-            <a href="/sop/{{ $sop->id }}" class="btn btn-info btn-sm">Detail</a>
-            <a href="/sop/{{ $sop->id }}/edit" class="btn btn-warning btn-sm">Edit</a>
-            <a href="/sop/{{ $sop->id }}/delete" class="btn btn-danger btn-sm">Hapus</a>
+            <a href="/sop/{{ $sop->id }}"
+            class="btn btn-info btn-sm">
+                Detail
+            </a>
+
+            <a href="/sop/{{ $sop->id }}/pdf"
+            class="btn btn-success btn-sm">
+                PDF
+            </a>
+
+            <a href="/sop/{{ $sop->id }}/excel"
+            class="btn btn-primary btn-sm">
+                Excel
+            </a>
+
+            <a href="/sop/{{ $sop->id }}/delete"
+            class="btn btn-danger btn-sm">
+                Hapus
+            </a>
         </td>
     </tr>
     @endforeach

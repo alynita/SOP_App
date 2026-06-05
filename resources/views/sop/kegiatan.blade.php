@@ -73,18 +73,20 @@
             class="form-control mb-2"
             required>
 
-            <option value="">-- Pilih Tipe --</option>
+            <option value="">
+                -- Pilih Jenis Kegiatan --
+            </option>
 
             <option value="start">
-                🟢 Mulai
+                🟢 Mulai Proses
             </option>
 
             <option value="proses">
-                🟦 Proses
+                🟦 Aktivitas / Proses Kerja
             </option>
 
             <option value="decision">
-                🔶 Decision
+                🔶 Pemeriksaan / Percabangan (Ya/Tidak)
             </option>
 
             <option value="end">
@@ -94,14 +96,18 @@
         </select>
 
         <!-- INFO -->
-        <div class="alert alert-success p-2 mt-2"
+        <div class="alert alert-info p-2 mt-2"
             style="font-size:12px;">
 
-            🔶 Decision otomatis:<br>
+            <b>Petunjuk Pemilihan:</b><br><br>
 
-            ✔ YA → lanjut ke langkah berikutnya<br>
+            🟢 Mulai Proses → digunakan untuk awal SOP<br>
 
-            ✔ TIDAK → kembali ke langkah sebelumnya
+            🟦 Aktivitas / Proses Kerja → digunakan untuk kegiatan biasa<br>
+
+            🔶 Pemeriksaan / Percabangan → digunakan jika ada kondisi Ya / Tidak<br>
+
+            🔴 Selesai → digunakan untuk akhir SOP
 
         </div>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Sop;
+use App\Models\User;
 
 class DashboardController extends Controller
 {
@@ -33,13 +34,37 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function dashboardAdmin()
+    {
+        return view('admin.dashboard', [
+
+            'totalUser' => User::count(),
+
+            'totalSop' => Sop::count(),
+
+            'disetujui' => Sop::where('status', 'disetujui')->count(),
+
+            'ditolak' => Sop::where('status', 'ditolak')->count(),
+
+            'diajukan' => Sop::where('status', 'diajukan')->count(),
+
+            'sops' => Sop::latest()->take(5)->get()
+
+        ]);
+    }
+
     public function approve($id)
     {
-        $sop = Sop::find($id);
+        $sop = Sop::findOrFail($id);
+
         $sop->status = 'disetujui';
+
+        $sop->timker_approved_by = auth()->user()->name;
+        $sop->timker_approved_at = now();
+
         $sop->save();
 
-        return back()->with('success', 'SOP disetujui');
+        return back()->with('success', 'SOP disetujui Timker 4');
     }
 
     public function reject(Request $request, $id)
@@ -57,5 +82,14 @@ class DashboardController extends Controller
             'success',
             'SOP ditolak'
         );
+    }
+
+    public function arsip()
+    {
+        $arsip = Sop::whereIn('status', ['disetujui', 'ditolak'])
+            ->latest()
+            ->get();
+
+        return view('dashboard.arsip', compact('arsip'));
     }
 }

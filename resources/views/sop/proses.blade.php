@@ -8,6 +8,7 @@
 
     <tr>
         <th>No</th>
+        <th>No SOP</th>
         <th>Nama SOP</th>
         <th>Status</th>
         <th>Aksi</th>
@@ -18,6 +19,8 @@
     <tr>
 
         <td>{{ $loop->iteration }}</td>
+
+        <td>{{ $sop->no_sop }}</td>
 
         <td>{{ $sop->nama_sop }}</td>
 
@@ -42,6 +45,12 @@
 
             {{-- STATUS DRAFT / DITOLAK --}}
             @if($sop->status == 'draft' || $sop->status == 'ditolak')
+
+                {{-- EDIT JUDUL --}}
+                <a href="/sop/{{ $sop->id }}/edit"
+                class="btn btn-secondary btn-sm">
+                    Edit Judul
+                </a>
 
                 {{-- BELUM ADA KEGIATAN --}}
                 @if($sop->kegiatan->count() == 0)

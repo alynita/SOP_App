@@ -52,9 +52,9 @@
                 <th>No SOP</th>
                 <th>Nama SOP</th>
                 <th>Tanggal</th>
-                <th>Aksi</th>
                 <th>Status</th>
                 <th>Catatan Revisi</th>
+                <th>Aksi</th>
             </tr>
 
             @foreach($sops as $s)
@@ -62,9 +62,6 @@
                 <td>{{ $s->no_sop }}</td>
                 <td>{{ $s->nama_sop }}</td>
                 <td>{{ $s->tgl_pembuatan }}</td>
-                <td>
-                    <a href="/sop/{{ $s->id }}" class="btn btn-info btn-sm">Lihat</a>
-                </td>
                 <td>
                     @if($s->status == 'draft')
                         <span class="badge bg-secondary">Draft</span>
@@ -84,6 +81,41 @@
                     @else
                         -
                     @endif
+                </td>
+                
+                <td>
+
+                    <a href="/sop/{{ $s->id }}"
+                    class="btn btn-info btn-sm">
+                        Lihat
+                    </a>
+
+                    {{-- JIKA DITOLAK --}}
+                    @if($s->status == 'ditolak')
+
+                        <a href="/sop/{{ $s->id }}/edit"
+                        class="btn btn-warning btn-sm">
+                            Revisi
+                        </a>
+
+                    @endif
+
+                    {{-- SETELAH DIREVISI --}}
+                    @if($s->status == 'draft' && $s->catatan_revisi)
+
+                        <form action="/sop/{{ $s->id }}/submit"
+                            method="POST"
+                            style="display:inline;">
+                            @csrf
+
+                            <button class="btn btn-success btn-sm">
+                                Ajukan
+                            </button>
+
+                        </form>
+
+                    @endif
+
                 </td>
             </tr>
             @endforeach

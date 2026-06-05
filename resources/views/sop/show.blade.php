@@ -3,69 +3,74 @@
 @section('content')
 
 <style>
-.sop-table td, .sop-table th {
-    border: 1px solid black;
-    padding: 5px;
-    font-size: 12px;
-}
+    body{
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+    }
 
-.flow-cell{
-    position: relative;
-    width: 120px;
-    height: 120px;
-    text-align:center;
-    vertical-align:middle;
-}
+    .sop-table td, .sop-table th {
+        border: 1px solid black;
+        padding: 5px;
+        font-size: 12px;
+    }
 
-.flow-node{
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%, -50%);
-    z-index:20;
-    background:white;
-}
+    .flow-cell{
+        position: relative;
+        width: 120px;
+        height: 120px;
+        text-align:center;
+        vertical-align:middle;
+    }
 
-/* PROCESS */
-.flow-process{
-    width:60px;
-    height:30px;
-    border:2px solid black;
-}
+    .flow-node{
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform:translate(-50%, -50%);
+        z-index:20;
+        background:white;
+    }
 
-/* START END */
-.flow-start,
-.flow-end{
-    width:70px;
-    height:30px;
-    border:2px solid black;
-    border-radius:20px;
-    line-height:26px;
-    font-size:11px;
-}
+    /* PROCESS */
+    .flow-process{
+        width:60px;
+        height:30px;
+        border:2px solid black;
+    }
 
-/* DECISION */
-.flow-decision{
-    width:40px;
-    height:40px;
-    border:2px solid black;
-    transform:translate(-50%, -50%) rotate(45deg);
-}
+    /* START END */
+    .flow-start,
+    .flow-end{
+        width:70px;
+        height:30px;
+        border:2px solid black;
+        border-radius:20px;
+        line-height:26px;
+        font-size:11px;
+    }
 
-/* SVG */
-#flow-wrapper{
-    position:relative;
-}
+    /* DECISION */
+    .flow-decision{
+        width:40px;
+        height:40px;
+        border:2px solid black;
+        transform:translate(-50%, -50%) rotate(45deg);
+    }
 
-#flow-svg{
-    position:absolute;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    pointer-events:none;
-    z-index:5;
-}
+    /* SVG */
+    #flow-wrapper{
+        position:relative;
+    }
+
+    #flow-svg{
+        position:absolute;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+        pointer-events:none;
+        z-index:5;
+    }
 </style>
 
 <div class="card">
@@ -93,38 +98,91 @@
                 <!-- KANAN -->
                 <td width="40%">
                     <table class="w-100">
+
                         <tr>
                             <td>Nomor SOP</td>
                             <td>: {{ $sop->no_sop }}</td>
                         </tr>
+
                         <tr>
                             <td>Tgl. Pembuatan</td>
                             <td>: {{ $sop->tgl_pembuatan }}</td>
-                            </tr>
+                        </tr>
+
                         <tr>
                             <td>Tgl. Revisi</td>
                             <td>: {{ $sop->tgl_revisi }}</td>
                         </tr>
+
                         <tr>
                             <td>Tgl. Efektif</td>
                             <td>: {{ $sop->tgl_efektif }}</td>
                         </tr>
+
+                        <!-- ================= TIMKER 4 ================= -->
+                        <tr>
+                            <td>Disetujui</td>
+                            <td>:</td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2" class="text-center">
+
+                                <div>MENYETUJUI</div>
+                                <div>Penjaminan Mutu</div>
+
+                                <div style="margin-top:20px;">
+
+                                    @if($sop->status == 'disetujui')
+
+                                        <div style="opacity:0.6; font-weight:bold; color:green;">
+                                            ✔ APPROVED
+                                        </div>
+
+                                        <div>
+                                            {{ $sop->timker_approved_by ?? '-' }}
+                                        </div>
+
+                                        <small>
+                                            {{ $sop->timker_approved_at ?? '-' }}
+                                        </small>
+
+                                    @else
+
+                                        <em style="color:red;">
+                                            Menunggu persetujuan Timker 4
+                                        </em>
+
+                                    @endif
+
+                                </div>
+
+                            </td>
+                        </tr>
+
+                        <!-- ================= KEPALA BBPK ================= -->
                         <tr>
                             <td>Disahkan oleh</td>
-                            <td>: </td>
+                            <td>:</td>
                         </tr>
+
                         <tr>
                             <td colspan="2" class="text-center">
                                 Kepala BBPK Jakarta
+
                                 <br><br><br><br>
+
                                 <b>{{ $sop->disahkan_oleh ?? '-' }}</b><br>
                                 NIP. {{ $sop->nip_pengesah ?? '-' }}
                             </td>
                         </tr>
+
+                        <!-- ================= NAMA SOP ================= -->
                         <tr>
                             <td>Nama SOP</td>
                             <td>: {{ $sop->nama_sop }}</td>
                         </tr>
+
                     </table>
                 </td>
             </tr>
@@ -218,8 +276,24 @@
             </tr>
             
             <tr>
-                @foreach($pelaksanas as $p)
-                <th>{{ $p->nama }}</th>
+                @php
+                    $urutanPelaksana = [];
+
+                    foreach($sop->kegiatan as $k){
+
+                        foreach($k->pelaksana as $p){
+
+                            if(!collect($urutanPelaksana)->contains('id', $p->id)){
+
+                                $urutanPelaksana[] = $p;
+
+                            }
+                        }
+                    }
+                @endphp
+
+                @foreach($urutanPelaksana as $p)
+                    <th>{{ $p->nama }}</th>
                 @endforeach
                 
                 <th>Kelengkapan</th>
@@ -234,7 +308,7 @@
                 <td>{{ $k->no_urutan }}</td>
                 <td>{{ $k->nama_kegiatan }}</td>
                 
-                @foreach($pelaksanas as $p)
+                @foreach($urutanPelaksana as $p)
                 <td class="flow-cell">
                     
                 @if($k->pelaksana->contains($p->id))
@@ -778,6 +852,36 @@ window.addEventListener("load", () => {
         "resize",
         render
     );
+
+    // =========================
+    // SAVE FLOWCHART PNG
+    // =========================
+
+    setTimeout(async () => {
+
+        const canvas = await html2canvas(wrapper,{
+            scale:2
+        });
+
+        const image =
+            canvas.toDataURL('image/png');
+
+        fetch('/sop/{{ $sop->id }}/save-flowchart',{
+
+            method:'POST',
+
+            headers:{
+                'Content-Type':'application/json',
+                'X-CSRF-TOKEN':'{{ csrf_token() }}'
+            },
+
+            body:JSON.stringify({
+                image:image
+            })
+
+        });
+
+    }, 1000);
 
 });
 

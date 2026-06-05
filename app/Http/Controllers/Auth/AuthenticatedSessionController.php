@@ -30,13 +30,23 @@ class AuthenticatedSessionController extends Controller
 
         $user = auth()->user();
 
-        // 🔥 Kalau pakai ROLE
-        if ($user->role == 'timker4') {
-            return redirect('/dashboard-timker4');
+        if($user->role == 'admin'){
+
+            return redirect('/admin/dashboard');
+
         }
 
-        // 🔥 Semua timker lain
-        return redirect('/dashboard');
+        elseif($user->role == 'timker4'){
+
+            return redirect('/dashboard-timker4');
+
+        }
+
+        else{
+
+            return redirect('/dashboard');
+
+        }
     }
 
     /**

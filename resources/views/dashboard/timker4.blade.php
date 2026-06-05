@@ -67,7 +67,24 @@
                 <td>{{ $s->no_sop }}</td>
                 <td>{{ $s->nama_sop }}</td>
                 <td>{{ $s->tgl_pembuatan }}</td>
-                <td>Timker {{ $s->timker_id }}</td>
+                <td>
+                    Timker {{ $s->timker_id }}
+
+                    <br>
+
+                    @if($s->status == 'disetujui')
+                        <span class="text-success">✔ Approved</span>
+                    @elseif($s->status == 'ditolak')
+                        <span class="text-danger">✖ Rejected</span>
+                    @else
+                        <span class="text-warning">⏳ Pending</span>
+                    @endif
+
+                    @if($s->timker_approved_at)
+                        <br>
+                        <small>{{ $s->timker_approved_at }}</small>
+                    @endif
+                </td>
 
                 <td>
                     <a href="/sop/{{ $s->id }}" class="btn btn-info btn-sm">Lihat</a>

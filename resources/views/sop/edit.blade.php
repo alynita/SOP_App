@@ -163,7 +163,15 @@
 </div>
 </div>
 
-<button class="btn btn-primary btn-sm">Update</button>
+<!-- BUTTON EDIT PROSES -->
+<a href="/sop/{{ $sop->id }}/kegiatan/edit"
+class="btn btn-warning btn-sm mb-2">
+    Edit Proses SOP
+</a>
+
+<button class="btn btn-primary btn-sm">
+    Update
+</button>
 
 </form>
 

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SopController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,21 +34,52 @@ require __DIR__.'/auth.php';
 Route::middleware(['auth'])->group(function () {
 
     /*
-    |------------------------------------------
+    |--------------------------------------------------------------------------
     | DASHBOARD
-    |------------------------------------------
+    |--------------------------------------------------------------------------
     */
 
     Route::get('/dashboard', [SopController::class, 'dashboard']);
 
+    /* ================= TIMKER 4 ================= */
+
     Route::get('/dashboard-timker4', function () {
-        if (auth()->user()->role != 'timker4') {
+
+        if(auth()->user()->role != 'timker4'){
             abort(403);
         }
 
-        return app(DashboardController::class)->dashboardTimker4();
+        return app(DashboardController::class)
+            ->dashboardTimker4();
+
     });
 
+    /* ================= ADMIN ================= */
+
+    Route::get('/admin/dashboard', function () {
+
+        if(auth()->user()->role != 'admin'){
+            abort(403);
+        }
+
+        return app(DashboardController::class)
+            ->dashboardAdmin();
+
+    });
+
+
+    /*
+    |------------------------------------------
+    | ADMIN
+    |------------------------------------------
+    */
+    Route::get('/admin/users', [UserController::class, 'index']);
+    Route::get('/admin/users/create', [UserController::class, 'create']);
+    Route::post('/admin/users/store', [UserController::class, 'store']);
+    Route::get('/admin/users/{id}/edit',[UserController::class, 'edit']);
+    Route::put('/admin/users/{id}',[UserController::class, 'update']);
+    Route::delete('/admin/users/{id}',[UserController::class, 'destroy']);
+    Route::get('/admin/monitoring',[UserController::class, 'monitoring']);
 
     /*
     |------------------------------------------
@@ -105,7 +137,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/sop/{id}/update', [SopController::class, 'update']);
     Route::get('/sop/{id}/delete', [SopController::class, 'delete']);
     Route::post('/sop/{id}/submit', [SopController::class, 'submit']);
-
+    Route::get('/sop/{id}/pdf', [SopController::class, 'pdf']);
+    Route::get('/sop/{id}/excel', [SopController::class, 'excel']);
+    Route::post('/sop/{id}/save-flowchart',[SopController::class, 'saveFlowchart']);
     
     Route::get('/sop/{id}/kegiatan/edit',
         [SopController::class, 'editKegiatan']);
@@ -122,6 +156,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/sop/{id}/approve', [SopController::class, 'approve']);
     Route::post('/sop/{id}/reject', [SopController::class, 'reject']);
+
+
+    Route::get('/timker4/arsip', [DashboardController::class, 'arsip']);
 
 
     /*

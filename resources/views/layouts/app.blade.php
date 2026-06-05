@@ -104,18 +104,40 @@
         </div>
 
         <!-- DASHBOARD -->
-        @if(auth()->user()->role == 'timker4')
-            <a href="/dashboard-timker4">🏠 Dashboard PM</a>
+        @if(auth()->user()->role == 'admin')
+
+            <a href="/admin/dashboard">🏠 Dashboard Admin</a>
+
+            <div class="section">ADMIN</div>
+
+            <a href="/admin/users">👥 Data User</a>
+
+            <a href="/admin/monitoring">📊 Monitoring SOP</a>
+
+            <a href="/admin/pengaturan">⚙ Pengaturan Sistem</a>
+
         @else
-            <a href="/dashboard">🏠 Dashboard</a>
+
+            @if(auth()->user()->role == 'timker4')
+                <a href="/dashboard-timker4">🏠 Dashboard PM</a>
+            @else
+                <a href="/dashboard">🏠 Dashboard</a>
+            @endif
+
+            <!-- SOP -->
+            <div class="section">MANAJEMEN SOP</div>
+
+            <a href="/sop/create">📥 Input SOP</a>
+
+            <a href="/proses-sop">🔄 Proses SOP</a>
+
+            <a href="/sop">📄 Data SOP</a>
+
+            @if(auth()->user()->role == 'timker4')
+                <a href="/timker4/arsip">🗂 Arsip SOP</a>
+            @endif
+
         @endif
-
-        <!-- SOP -->
-        <div class="section">MANAJEMEN SOP</div>
-
-        <a href="/sop/create">📥 Input SOP</a>
-        <a href="/proses-sop">🔄 Proses SOP</a>
-        <a href="/sop">📄 Data SOP</a>
 
         <!-- PENGATURAN -->
         <div class="section">PENGATURAN</div>
@@ -153,6 +175,8 @@
     </div>
 
 </div>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
 </body>
 </html>

@@ -13,6 +13,8 @@ use App\Models\Pencatatan;
 use App\Models\Kegiatan;
 use App\Models\Pelaksana;
 
+use Barryvdh\DomPDF\Facade\Pdf;
+
 class SopController extends Controller
 {
     public function dashboard()
@@ -61,12 +63,15 @@ class SopController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
+
         $data['status'] = 'draft';
-        $data['user_id'] = auth()->id(); // 🔥 penting
+
+        $data['user_id'] = auth()->id();
+
+        $data['timker_id'] = auth()->user()->role;
 
         $sop = Sop::create($data);
 
-        // 👉 lanjut ke dasar hukum
         return redirect('/sop/' . $sop->id . '/dasar-hukum');
     }
 
@@ -240,7 +245,10 @@ class SopController extends Controller
 
     public function proses()
     {
-        $sops = Sop::all();
+        $sops = Sop::where('user_id', auth()->id())
+            ->where('status', '!=', 'disetujui')
+            ->latest()
+            ->get();
 
         return view('sop.proses', compact('sops'));
     }
@@ -294,15 +302,19 @@ class SopController extends Controller
     {
         $sop = Sop::findOrFail($id);
 
-        $user = auth()->user(); // 🔥 timker 4
+        $user = auth()->user(); // Timker 4
 
         $sop->status = 'disetujui';
-        $sop->disahkan_oleh = $user->name;
-        $sop->nip_pengesah = $user->nip; // 🔥 tambahin ini
+
+        // 🔥 hanya untuk tracking timker
+        $sop->timker_approved_by = $user->name;
+        $sop->timker_approved_at = now();
+
+        $sop->status = 'disetujui';
 
         $sop->save();
 
-        return back()->with('success', 'SOP disetujui');
+        return back()->with('success', 'SOP disetujui Timker 4');
     }
 
     public function reject(Request $request, $id)
@@ -401,7 +413,12 @@ class SopController extends Controller
             }
         }
 
-        return redirect('/sop')->with('success', 'Data berhasil diupdate');
+        // STATUS BALIK KE DRAFT
+        $sop->status = 'draft';
+        $sop->save();
+
+        return redirect()->back()->with('success', 'Data berhasil diupdate');
+
     }
 
     public function delete($id)
@@ -505,5 +522,91 @@ class SopController extends Controller
         }
 
         return redirect('/sop/' . $id);
+    }
+
+    public function pdf($id)
+    {
+        $sop = Sop::with([
+            'kegiatan.pelaksana',
+            'dasarHukum',
+            'kualifikasis',
+            'keterkaitans',
+            'peralatans',
+            'peringatans',
+            'pencatatans'
+        ])->findOrFail($id);
+
+        // URUTAN PELAKSANA
+        $urutanPelaksana = [];
+
+        foreach($sop->kegiatan as $k){
+
+            foreach($k->pelaksana as $p){
+
+                if(!collect($urutanPelaksana)->contains('id', $p->id)){
+
+                    $urutanPelaksana[] = $p;
+
+                }
+            }
+        }
+
+        return Pdf::loadView(
+            'sop.pdf',
+            compact('sop', 'urutanPelaksana')
+        )
+        ->setPaper('a4', 'landscape')
+        ->download('sop.pdf');
+    }
+
+    public function saveFlowchart(Request $request, $id)
+    {
+        $image = $request->image;
+
+        $image = str_replace(
+            'data:image/png;base64,',
+            '',
+            $image
+        );
+
+        $image = str_replace(
+            ' ',
+            '+',
+            $image
+        );
+
+        $data = base64_decode($image);
+
+        // folder flowcharts
+        if(!file_exists(public_path('flowcharts'))){
+
+            mkdir(
+                public_path('flowcharts'),
+                0777,
+                true
+            );
+
+        }
+
+        // simpan png
+        file_put_contents(
+
+            public_path(
+                'flowcharts/flowchart_'.$id.'.png'
+            ),
+
+            $data
+        );
+
+        return response()->json([
+            'success' => true
+        ]);
+    }
+
+    public function excel($id)
+    {
+        $sop = Sop::findOrFail($id);
+
+        return view('sop.excel', compact('sop'));
     }
 }
