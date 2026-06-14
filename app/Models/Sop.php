@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 use App\Models\DasarHukum;
 use App\Models\KualifikasiPelaksana;
 use App\Models\Keterkaitan;
@@ -28,6 +29,11 @@ class Sop extends Model
     ];
 
     // RELASI
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function dasarHukum()
     {
         return $this->hasMany(DasarHukum::class);

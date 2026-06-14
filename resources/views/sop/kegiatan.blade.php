@@ -48,22 +48,20 @@
 
         @foreach($pelaksana as $p)
 
-            <div>
-                <input type="checkbox"
-                    name="pelaksana[0][]"
-                    value="{{ $p->id }}">
+        <div>
+            <input type="checkbox"
+                name="pelaksana[0][]"
+                value="{{ $p->id }}">
 
-                {{ $p->nama }}
-            </div>
+            {{ $p->nama }}
+        </div>
 
         @endforeach
 
         <input type="text"
             name="pelaksana_baru[0][]"
             class="form-control mt-2"
-            placeholder="Tambah pelaksana (pisah koma)">
-
-        <hr>
+            placeholder="Tambah pelaksana baru (pisah koma)">
 
         <!-- TIPE -->
         <label>Tipe Flowchart</label>
@@ -163,7 +161,7 @@ function tambah(){
             "pelaksana["+index+"][]";
     });
 
-    // FIX PELAKSANA BARU
+    // RESET PELAKSANA BARU
     item.querySelectorAll(
         'input[name^="pelaksana_baru"]'
     ).forEach(el => {
@@ -174,7 +172,7 @@ function tambah(){
             "pelaksana_baru["+index+"][]";
     });
 
-    // FIX TIPE
+    // RESET TIPE
     item.querySelectorAll(
         'select[name^="tipe"]'
     ).forEach(el => {
@@ -191,5 +189,4 @@ function tambah(){
 }
 
 </script>
-
 @endsection

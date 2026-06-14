@@ -16,8 +16,12 @@
 
     .flow-cell{
         position: relative;
-        width: 120px;
+
+        width: 140px;
+        min-width: 140px;
+
         height: 120px;
+
         text-align:center;
         vertical-align:middle;
     }
@@ -26,40 +30,58 @@
         position:absolute;
         top:50%;
         left:50%;
+
         transform:translate(-50%, -50%);
+
         z-index:20;
+
         background:white;
+
+        overflow:hidden;
     }
 
     /* PROCESS */
     .flow-process{
-        width:60px;
-        height:30px;
+        width:70px;
+        min-height:40px;
+
         border:2px solid black;
+        border-radius:6px;
+
+        padding:4px;
     }
 
     /* START END */
     .flow-start,
     .flow-end{
-        width:70px;
-        height:30px;
+        width:80px;
+        min-height:35px;
+
         border:2px solid black;
-        border-radius:20px;
-        line-height:26px;
-        font-size:11px;
+        border-radius:25px;
+
+        padding:4px;
     }
 
     /* DECISION */
     .flow-decision{
-        width:40px;
-        height:40px;
+        width:50px;
+        height:50px;
+
         border:2px solid black;
-        transform:translate(-50%, -50%) rotate(45deg);
+
+        transform:
+            translate(-50%, -50%)
+            rotate(45deg);
+
+        background:white;
     }
 
     /* SVG */
     #flow-wrapper{
         position:relative;
+        overflow:auto;
+        padding:40px;
     }
 
     #flow-svg{
@@ -71,6 +93,12 @@
         pointer-events:none;
         z-index:5;
     }
+
+    #flow-table{
+        table-layout: fixed;
+        min-width: max-content;
+    }
+
 </style>
 
 <div class="card">
@@ -128,39 +156,39 @@
                         <tr>
                             <td colspan="2" class="text-center">
 
-                                <div>MENYETUJUI</div>
-                                <div>Penjaminan Mutu</div>
+                                Penjaminan Mutu
 
-                                <div style="margin-top:20px;">
+                                <br><br>
 
-                                    @if($sop->status == 'disetujui')
+                                @if($sop->status == 'disetujui' || $sop->status == 'disahkan')
 
-                                        <div style="opacity:0.6; font-weight:bold; color:green;">
-                                            ✔ APPROVED
-                                        </div>
+                                    <img
+                                        src="{{ asset('ttd-pm.jpg') }}"
+                                        width="120">
 
-                                        <div>
-                                            {{ $sop->timker_approved_by ?? '-' }}
-                                        </div>
+                                    <br>
 
-                                        <small>
-                                            {{ $sop->timker_approved_at ?? '-' }}
-                                        </small>
+                                    <b>{{ $sop->timker_approved_by ?? '-' }}</b>
 
-                                    @else
+                                    <br>
 
-                                        <em style="color:red;">
-                                            Menunggu persetujuan Timker 4
-                                        </em>
+                                    <small>
+                                        {{ $sop->timker_approved_at ?? '-' }}
+                                    </small>
 
-                                    @endif
+                                @else
 
-                                </div>
+                                    <br><br>
+
+                                    <em style="color:red;">
+                                        Menunggu persetujuan Timker 4
+                                    </em>
+
+                                @endif
 
                             </td>
                         </tr>
 
-                        <!-- ================= KEPALA BBPK ================= -->
                         <tr>
                             <td>Disahkan oleh</td>
                             <td>:</td>
@@ -168,12 +196,35 @@
 
                         <tr>
                             <td colspan="2" class="text-center">
+
                                 Kepala BBPK Jakarta
 
-                                <br><br><br><br>
+                                <br><br>
 
-                                <b>{{ $sop->disahkan_oleh ?? '-' }}</b><br>
-                                NIP. {{ $sop->nip_pengesah ?? '-' }}
+                                @if($sop->status == 'disahkan')
+
+                                    <img
+                                        src="{{ asset('ttd-kepala.jpg') }}"
+                                        width="120">
+
+                                    <br>
+
+                                    <b>{{ $sop->disahkan_oleh }}</b>
+
+                                    <br>
+
+                                    NIP. {{ $sop->nip_pengesah }}
+
+                                @else
+
+                                    <br><br>
+
+                                    <span style="color:red;">
+                                        Menunggu Pengesahan
+                                    </span>
+
+                                @endif
+
                             </td>
                         </tr>
 
@@ -259,14 +310,22 @@
     <div id="flow-wrapper" style="position:relative;">
 
     <svg id="flow-svg" 
-        style="position:absolute; top:0; left:0; width:100%; height:100%; min-height:1000px; pointer-events:none;">
+        style="
+            position:absolute;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            min-height:800px;
+            pointer-events:none;
+        ">
     </svg>
 
     <table id="flow-table" class="table table-bordered">
         <thead>
             <tr>
-                <th rowspan="2">No</th>
-                <th rowspan="2">Kegiatan</th>
+                <th rowspan="2" style="width:50px;">No</th>
+                <th rowspan="2" style="width:350px;">Kegiatan</th>
 
                 <th colspan="{{ count($pelaksanas) }}">Pelaksana</th>
 
@@ -306,7 +365,13 @@
             @foreach($sop->kegiatan as $k)
             <tr>
                 <td>{{ $k->no_urutan }}</td>
-                <td>{{ $k->nama_kegiatan }}</td>
+                <td style="
+                    min-width:350px;
+                    width:350px;
+                    white-space:normal;
+                ">
+                    {{ $k->nama_kegiatan }}
+                </td>
                 
                 @foreach($urutanPelaksana as $p)
                 <td class="flow-cell">
@@ -398,46 +463,45 @@ window.addEventListener("load", () => {
     // =========================
     function createDefs(){
 
-        const defs = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "defs"
-        );
+        const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
 
-        const marker = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "marker"
-        );
-
+        // marker hitam (Ya)
+        const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
         marker.setAttribute("id", "arrow");
-        marker.setAttribute("markerWidth", "8");
-        marker.setAttribute("markerHeight", "8");
-        marker.setAttribute("refX", "6");
+        marker.setAttribute("markerWidth", "6");
+        marker.setAttribute("markerHeight", "6");
+        marker.setAttribute("refX", "5");
         marker.setAttribute("refY", "3");
         marker.setAttribute("orient", "auto");
         marker.setAttribute("markerUnits", "strokeWidth");
 
-        const arrow = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "path"
-        );
-
-        arrow.setAttribute(
-            "d",
-            "M0,0 L0,6 L6,3 z"
-        );
-
-        arrow.setAttribute(
-            "fill",
-            "#000"
-        );
+        const arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        arrow.setAttribute("d", "M0,0 L0,6 L6,3 z");
+        arrow.setAttribute("fill", "#000");
 
         marker.appendChild(arrow);
-
         defs.appendChild(marker);
 
+        // marker merah (Tidak)
+        const markerRed = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+        markerRed.setAttribute("id", "arrow-red");
+        markerRed.setAttribute("markerWidth", "6");
+        markerRed.setAttribute("markerHeight", "6");
+        markerRed.setAttribute("refX", "5");
+        markerRed.setAttribute("refY", "3");
+        markerRed.setAttribute("orient", "auto");
+        markerRed.setAttribute("markerUnits", "strokeWidth");
+
+        const arrowRed = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        arrowRed.setAttribute("d", "M0,0 L0,6 L6,3 z");
+        arrowRed.setAttribute("fill", "red");
+
+        markerRed.appendChild(arrowRed);
+        defs.appendChild(markerRed);
+
+        // append defs ke svg setelah semua marker siap
         svg.appendChild(defs);
     }
-
     // =========================
     // GET RECT
     // =========================
@@ -478,45 +542,17 @@ window.addEventListener("load", () => {
     // =========================
     // CREATE PATH
     // =========================
-    function createPath(d){
+    function createPath(d, color = '#000'){
 
-        const path =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "path"
-            );
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
 
         path.setAttribute("d", d);
-
-        path.setAttribute(
-            "fill",
-            "none"
-        );
-
-        path.setAttribute(
-            "stroke",
-            "#000"
-        );
-
-        path.setAttribute(
-            "stroke-width",
-            "1.5"
-        );
-
-        path.setAttribute(
-            "stroke-linecap",
-            "square"
-        );
-
-        path.setAttribute(
-            "stroke-linejoin",
-            "miter"
-        );
-
-        path.setAttribute(
-            "marker-end",
-            "url(#arrow)"
-        );
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", color);
+        path.setAttribute("stroke-width", "1");
+        path.setAttribute("stroke-linecap", "round");
+        path.setAttribute("stroke-linejoin", "round");
+        path.setAttribute("marker-end", color === 'red' ? "url(#arrow-red)" : "url(#arrow)");
 
         svg.appendChild(path);
     }
@@ -524,33 +560,16 @@ window.addEventListener("load", () => {
     // =========================
     // CREATE LABEL
     // =========================
-    function createLabel(x, y, text){
+    function createLabel(x, y, text, color = '#000'){
 
-        const label =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "text"
-            );
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
 
         label.setAttribute("x", x);
-
         label.setAttribute("y", y);
-
-        label.setAttribute(
-            "font-size",
-            "11"
-        );
-
-        label.setAttribute(
-            "font-family",
-            "Arial"
-        );
-
-        label.setAttribute(
-            "font-weight",
-            "600"
-        );
-
+        label.setAttribute("font-size", "8");
+        label.setAttribute("font-family", "Arial");
+        label.setAttribute("font-weight", "600");
+        label.setAttribute("fill", color);
         label.textContent = text;
 
         svg.appendChild(label);
@@ -696,7 +715,7 @@ window.addEventListener("load", () => {
             const endX = b.right;
 
             // keluar lebih jauh
-            const loopX = startX - 100;
+            const loopX = startX - 60;
 
             d = `
                 M ${startX} ${startY}
@@ -722,7 +741,7 @@ window.addEventListener("load", () => {
             const endX = b.left;
 
             // keluar lebih jauh
-            const loopX = startX + 100;
+            const loopX = startX + 60;
 
             d = `
                 M ${startX} ${startY}
@@ -738,14 +757,11 @@ window.addEventListener("load", () => {
             labelX = loopX + 10;
         }
 
-        createPath(d);
+        createPath(d, 'red');
 
-        createLabel(
-            labelX,
-            labelY,
-            'Tidak'
-        );
+        createLabel(labelX, labelY, 'Tidak', 'red');
     }
+
     // =========================
     // RENDER
     // =========================

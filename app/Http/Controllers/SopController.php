@@ -12,6 +12,7 @@ use App\Models\Peringatan;
 use App\Models\Pencatatan;
 use App\Models\Kegiatan;
 use App\Models\Pelaksana;
+use App\Models\Notification;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -36,10 +37,17 @@ class SopController extends Controller
                     ->count();
 
         $sops = Sop::where('user_id', $userId)
-                    ->where('status', '!=', 'disetujui')
-                    ->latest()
-                    ->take(5)
-                    ->get();
+            ->where('status', '!=', 'disahkan')
+            ->latest()
+            ->take(5)
+            ->get();
+
+                    
+
+        // 🔔 AMBIL NOTIF
+        $notifications = Notification::where('user_id', auth()->id())
+            ->latest()
+            ->get();
 
         return view(
             'sop.dashboard',
@@ -48,7 +56,8 @@ class SopController extends Controller
                 'aktif',
                 'draft',
                 'revisi',
-                'sops'
+                'sops',
+                'notifications'
             )
         );
     }
@@ -302,17 +311,20 @@ class SopController extends Controller
     {
         $sop = Sop::findOrFail($id);
 
-        $user = auth()->user(); // Timker 4
+        $user = auth()->user();
 
         $sop->status = 'disetujui';
 
-        // 🔥 hanya untuk tracking timker
         $sop->timker_approved_by = $user->name;
         $sop->timker_approved_at = now();
 
-        $sop->status = 'disetujui';
-
         $sop->save();
+
+        Notification::create([
+            'user_id' => $sop->user_id,
+            'pesan' => 'Dokumen SOP yang Anda ajukan telah disetujui oleh Penjaminan Mutu.',
+            'url' => '/sop/' . $sop->id
+        ]);
 
         return back()->with('success', 'SOP disetujui Timker 4');
     }
@@ -323,10 +335,15 @@ class SopController extends Controller
 
         $sop->status = 'ditolak';
 
-        $sop->catatan_revisi =
-            $request->catatan_revisi;
+        $sop->catatan_revisi = $request->catatan_revisi;
 
         $sop->save();
+
+        Notification::create([
+            'user_id' => $sop->user_id,
+            'pesan' => 'Dokumen SOP yang Anda ajukan memerlukan revisi. Silakan periksa kembali catatan yang diberikan.',
+            'url' => '/sop/' . $sop->id
+        ]);
 
         return back()->with(
             'success',
@@ -435,6 +452,13 @@ class SopController extends Controller
 
         $sop->status = 'diajukan';
         $sop->save();
+
+        // misalnya user penjamin mutu id = 2
+        Notification::create([
+            'user_id' => 2,
+            'pesan' => 'Dokumen SOP baru telah diajukan dan menunggu proses verifikasi.',
+            'url' => '/validasi-sop'
+        ]);
 
         return redirect('/sop')->with('success', 'SOP berhasil diajukan');
     }

@@ -36,7 +36,7 @@
 
 <!-- AKSI CEPAT -->
 <div class="mb-3">
-    <a href="/" class="btn btn-primary btn-sm">+ Buat SOP</a>
+    <a href="/sop/create" class="btn btn-primary btn-sm">+ Buat SOP</a>
     <a href="/sop" class="btn btn-secondary btn-sm">Data SOP</a>
 </div>
 

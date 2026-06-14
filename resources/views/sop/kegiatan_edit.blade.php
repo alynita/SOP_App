@@ -53,18 +53,18 @@
 
     @foreach($pelaksana as $p)
 
-        <div>
-            <input type="checkbox"
-                name="pelaksana[{{ $i }}][]"
-                value="{{ $p->id }}"
+    <div>
+        <input type="checkbox"
+            name="pelaksana[{{ $i }}][]"
+            value="{{ $p->id }}"
 
-                @if($k->pelaksana->contains($p->id))
-                    checked
-                @endif
-            >
+            @if($k->pelaksana->contains($p->id))
+                checked
+            @endif
+        >
 
-            {{ $p->nama }}
-        </div>
+        {{ $p->nama }}
+    </div>
 
     @endforeach
 
@@ -72,8 +72,6 @@
         name="pelaksana_baru[{{ $i }}][]"
         class="form-control mt-2"
         placeholder="Tambah pelaksana baru (pisah koma)">
-
-    <hr>
 
     <!-- TIPE -->
     <label>Tipe Flowchart</label>
@@ -162,7 +160,6 @@ function tambah(){
         'input[type="text"], textarea'
     ).forEach(el => el.value = '');
 
-    // RESET CHECKBOX
     item.querySelectorAll(
         'input[type="checkbox"]'
     ).forEach(el => {
@@ -175,7 +172,7 @@ function tambah(){
 
     // RESET PELAKSANA BARU
     item.querySelectorAll(
-        'input[name^="pelaksana_baru"]'
+    'input[name^="pelaksana_baru"]'
     ).forEach(el => {
 
         el.value = '';

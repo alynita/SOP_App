@@ -1,200 +1,160 @@
 <x-guest-layout>
 
-<div class="min-h-screen flex items-center justify-center bg-[#f6faf7] px-6 py-10 overflow-hidden">
+<div class="min-h-screen bg-[#f6faf7] flex items-center justify-center px-6 py-10">
 
-    <!-- BACKGROUND -->
-    <div class="absolute inset-0 overflow-hidden">
+    <div class="w-full max-w-4xl">
 
-        <div class="absolute -top-32 -left-32 w-[500px] h-[500px]
-            bg-emerald-200/30 rounded-full blur-3xl">
+        <!-- HEADER -->
+        <div class="text-center mb-10">
+
+            <img
+                src="/logo.png"
+                alt="Logo BBPK Jakarta"
+                class="mx-auto h-48 object-contain mb-6"
+            >
+
+            <h1 style="
+                font-size: 90px;
+                font-weight: 900;
+                line-height: 1;
+                margin-bottom: 10px;
+                background: linear-gradient(to right,#84cc16,#06b6d4);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            ">
+                E-SOP
+            </h1>
+
+            <p class="text-lg text-gray-600">
+                (Elektronik Standar Operasional Prosedur)
+            </p>
+
         </div>
 
-        <div class="absolute -bottom-40 -right-40 w-[500px] h-[500px]
-            bg-teal-200/20 rounded-full blur-3xl">
-        </div>
+        <x-auth-session-status
+            class="mb-4"
+            :status="session('status')" />
 
-    </div>
+        <form method="POST" action="{{ route('login') }}">
 
-    <!-- CARD -->
-    <div class="relative w-full max-w-xl">
+            @csrf
 
-        <div class="bg-white rounded-3xl shadow-2xl
-            border border-emerald-100
-            px-10 py-10">
+            <!-- EMAIL -->
+            <div class="mb-6">
 
-            <!-- HEADER -->
-            <div class="text-center mb-10">
+                <label class="block text-xl font-medium text-gray-800 mb-2">
+                    Email
+                </label>
 
-                <!-- LOGO -->
-                <div class="mb-5">
+                <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    value="{{ old('email') }}"
+                    required
+                    autofocus
+                    placeholder="Masukkan Email"
+                    class="w-full rounded-xl border border-gray-300 px-5 py-4 text-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                >
 
-                    <img src="/logo.png"
-                        class="h-14 mx-auto object-contain">
-
-                </div>
-
-                <!-- TITLE -->
-                <h1 class="text-3xl font-bold text-slate-800">
-                    Sistem SOP
-                </h1>
-
-                <p class="text-slate-500 mt-2">
-                    Kementerian Kesehatan Republik Indonesia
-                </p>
-
-                <p class="text-sm text-slate-400 mt-1">
-                    Digital SOP Management System
-                </p>
+                <x-input-error
+                    :messages="$errors->get('email')"
+                    class="mt-2"
+                />
 
             </div>
 
-            <!-- SESSION -->
-            <x-auth-session-status
-                class="mb-4"
-                :status="session('status')" />
+            <!-- PASSWORD -->
+            <div class="mb-4">
 
-            <!-- FORM -->
-            <form method="POST" action="{{ route('login') }}">
+                <label class="block text-xl font-medium text-gray-800 mb-2">
+                    Password
+                </label>
 
-                @csrf
+                <input
+                    id="password"
+                    type="password"
+                    name="password"
+                    required
+                    placeholder="Masukkan Password"
+                    class="w-full rounded-xl border border-gray-300 px-5 py-4 text-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                >
 
-                <!-- EMAIL -->
-                <div class="mb-6">
+                <x-input-error
+                    :messages="$errors->get('password')"
+                    class="mt-2"
+                />
 
-                    <x-input-label
-                        for="email"
-                        value="Email"
-                        class="text-slate-700 mb-2"
-                    />
+            </div>
 
-                    <input
-                        id="email"
-                        type="email"
-                        name="email"
-                        value="{{ old('email') }}"
-                        required
-                        autofocus
-                        placeholder="Masukkan email"
-                        class="block w-full rounded-xl
-                        border border-slate-200
-                        px-5 py-3.5
-                        text-slate-800
-                        placeholder-slate-400
-                        focus:border-emerald-500
-                        focus:ring-emerald-500"
-                    />
+            <!-- REMEMBER -->
+            <div class="flex justify-between items-center mb-8">
 
-                    <x-input-error
-                        :messages="$errors->get('email')"
-                        class="mt-2"
-                    />
-
-                </div>
-
-                <!-- PASSWORD -->
-                <div class="mb-5">
-
-                    <x-input-label
-                        for="password"
-                        value="Password"
-                        class="text-slate-700 mb-2"
-                    />
+                <label class="flex items-center">
 
                     <input
-                        id="password"
-                        type="password"
-                        name="password"
-                        required
-                        placeholder="Masukkan password"
-                        class="block w-full rounded-xl
-                        border border-slate-200
-                        px-5 py-3.5
-                        text-slate-800
-                        placeholder-slate-400
-                        focus:border-emerald-500
-                        focus:ring-emerald-500"
-                    />
+                        id="remember_me"
+                        type="checkbox"
+                        name="remember"
+                        class="mr-2 rounded"
+                    >
 
-                    <x-input-error
-                        :messages="$errors->get('password')"
-                        class="mt-2"
-                    />
+                    <span class="text-gray-700">
+                        Remember me
+                    </span>
 
-                </div>
+                </label>
 
-                <!-- REMEMBER -->
-                <div class="flex items-center justify-between mb-8">
+                @if (Route::has('password.request'))
 
-                    <label class="flex items-center">
+                    <a
+                        href="{{ route('password.request') }}"
+                        class="text-emerald-600 hover:underline"
+                    >
+                        Lupa Password?
+                    </a>
 
-                        <input
-                            id="remember_me"
-                            type="checkbox"
-                            name="remember"
-                            class="rounded border-slate-300
-                            text-emerald-600
-                            focus:ring-emerald-500"
-                        >
+                @endif
 
-                        <span class="ml-2 text-sm text-slate-600">
-                            Remember me
-                        </span>
+            </div>
 
-                    </label>
+            <!-- BUTTON -->
+            <div class="text-center">
 
-                    <!-- FORGOT -->
-                    @if (Route::has('password.request'))
-
-                        <a href="{{ route('password.request') }}"
-                            class="text-sm text-emerald-600 hover:underline">
-
-                            Lupa Password?
-
-                        </a>
-
-                    @endif
-
-                </div>
-
-                <!-- BUTTON -->
                 <button
                     type="submit"
-                    class="w-full py-3.5 text-base rounded-xl
-                    bg-emerald-600 hover:bg-emerald-700
-                    text-white font-semibold
-                    shadow-lg transition-all duration-300"
+                    class="bg-green-600 hover:bg-green-700 text-white font-bold text-xl px-20 py-3 rounded-xl shadow-md"
                 >
                     Login
                 </button>
 
-                <!-- REGISTER -->
-                @if (Route::has('register'))
+            </div>
 
-                <div class="text-center mt-6 text-sm text-slate-600">
+            <!-- REGISTER -->
+            @if (Route::has('register'))
 
-                    Belum punya akun?
+            <div class="text-center mt-8 text-lg">
 
-                    <a href="{{ route('register') }}"
-                        class="text-emerald-600 font-semibold hover:underline">
+                Belum punya akun?
 
-                        Register
-
-                    </a>
-
-                </div>
-
-                @endif
-
-            </form>
-
-            <!-- FOOTER -->
-            <div class="text-center text-xs text-slate-400
-                mt-10 border-t pt-5">
-
-                © {{ date('Y') }}
-                BBPK Jakarta - Sistem SOP Digital
+                <a
+                    href="{{ route('register') }}"
+                    class="font-bold text-emerald-600 hover:underline"
+                >
+                    Register
+                </a>
 
             </div>
+
+            @endif
+
+        </form>
+
+        <!-- FOOTER -->
+        <div class="text-center mt-10 text-sm text-gray-500">
+
+            © {{ date('Y') }}
+            BBPK Jakarta - Elektronik Standar Operasional Prosedur
 
         </div>
 

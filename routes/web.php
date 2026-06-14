@@ -54,6 +54,13 @@ Route::middleware(['auth'])->group(function () {
 
     });
 
+    /* ================= KEPALA  ================= */
+
+    Route::get(
+        '/dashboard-kepala',
+        [DashboardController::class, 'dashboardKepala']
+    );
+
     /* ================= ADMIN ================= */
 
     Route::get('/admin/dashboard', function () {
@@ -64,6 +71,18 @@ Route::middleware(['auth'])->group(function () {
 
         return app(DashboardController::class)
             ->dashboardAdmin();
+
+    });
+
+    Route::get('/notifications/read/{id}', function($id){
+
+        $notif = \App\Models\Notification::findOrFail($id);
+
+        $notif->is_read = true;
+
+        $notif->save();
+
+        return redirect($notif->url);
 
     });
 
@@ -154,12 +173,19 @@ Route::middleware(['auth'])->group(function () {
     |------------------------------------------
     */
 
-    Route::post('/sop/{id}/approve', [SopController::class, 'approve']);
-    Route::post('/sop/{id}/reject', [SopController::class, 'reject']);
-
-
+    Route::post('/sop/{id}/approve', [DashboardController::class, 'approve']);
+    Route::post('/sop/{id}/reject', [DashboardController::class, 'reject']);
     Route::get('/timker4/arsip', [DashboardController::class, 'arsip']);
 
+    /*
+    |------------------------------------------
+    | KEPALA
+    |------------------------------------------
+    */
+
+    Route::get('/kepala/arsip',[DashboardController::class, 'arsipKepala']);
+    Route::get('/kepala/persetujuan',[DashboardController::class, 'persetujuanKepala']);
+    Route::post('/kepala/sop/{id}/approve',[DashboardController::class, 'approveKepala']);
 
     /*
     |------------------------------------------

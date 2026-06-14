@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Aplikasi SOP</title>
+    <title>E-SOP</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -29,8 +29,8 @@
         }
 
         .sidebar .logo img {
-            width: 60px;
-            height: 60px;
+            width: 140px;
+            height: auto;
             object-fit: contain;
             margin-bottom: 8px;
         }
@@ -100,11 +100,27 @@
         <!-- LOGO -->
         <div class="logo">
             <img src="/logo.png" alt="Logo">
-            <b>BBPK SOP</b>
+            <b>E-SOP</b>
         </div>
 
         <!-- DASHBOARD -->
-        @if(auth()->user()->role == 'admin')
+        @if(auth()->user()->role == 'kepala')
+
+            <a href="/dashboard-kepala">
+                🏠 Dashboard Kepala
+            </a>
+
+            <div class="section">PENGESAHAN SOP</div>
+
+            <a href="/kepala/persetujuan">
+                ✍️ Persetujuan SOP
+            </a>
+
+            <a href="/kepala/arsip">
+                🗂 Arsip SOP
+            </a>
+
+        @elseif(auth()->user()->role == 'admin')
 
             <a href="/admin/dashboard">🏠 Dashboard Admin</a>
 
@@ -162,9 +178,74 @@
                 <b>Aplikasi SOP</b>
             </div>
 
-            <div>
-                User | Logout
+            <div class="d-flex align-items-center gap-3">
+
+            <!-- NOTIF -->
+            <div class="dropdown">
+
+                <button
+                    class="btn btn-light position-relative"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">
+
+                    🔔
+
+                    @if(isset($notifications) && $notifications->where('is_read', false)->count() > 0)
+
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+
+                            {{ $notifications->where('is_read', false)->count() }}
+
+                        </span>
+
+                    @endif
+
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end shadow"
+                    style="
+                        width: 320px;
+                        max-height: 400px;
+                        overflow-y: auto;
+                    ">
+
+                    @forelse($notifications as $notif)
+
+                        <li>
+
+                            <a
+                                class="dropdown-item text-wrap py-2"
+                                href="/notifications/read/{{ $notif->id }}">
+
+                                {{ $notif->pesan }}
+
+                            </a>
+
+                        </li>
+
+                    @empty
+
+                        <li>
+
+                            <span class="dropdown-item text-muted">
+                                Tidak ada notifikasi
+                            </span>
+
+                        </li>
+
+                    @endforelse
+
+                </ul>
+
             </div>
+
+            <!-- USER -->
+            <div>
+                {{ auth()->user()->name }}
+            </div>
+
+        </div>
         </div>
 
         <!-- CONTENT -->
@@ -177,6 +258,8 @@
 </div>
 
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

@@ -57,12 +57,20 @@ class DashboardController extends Controller
     {
         $sop = Sop::findOrFail($id);
 
+        $user = auth()->user();
+
         $sop->status = 'disetujui';
 
-        $sop->timker_approved_by = auth()->user()->name;
+        $sop->timker_approved_by = $user->name;
         $sop->timker_approved_at = now();
 
         $sop->save();
+
+        Notification::create([
+            'user_id' => $sop->user_id,
+            'pesan' => 'Dokumen SOP yang Anda ajukan telah disetujui oleh Penjaminan Mutu.',
+            'url' => '/sop/' . $sop->id
+        ]);
 
         return back()->with('success', 'SOP disetujui Timker 4');
     }
@@ -73,14 +81,19 @@ class DashboardController extends Controller
 
         $sop->status = 'ditolak';
 
-        $sop->catatan_revisi =
-            $request->catatan_revisi;
+        $sop->catatan_revisi = $request->catatan_revisi;
 
         $sop->save();
 
+        Notification::create([
+            'user_id' => $sop->user_id,
+            'pesan' => 'Dokumen SOP yang Anda ajukan memerlukan revisi. Silakan periksa kembali catatan yang diberikan.',
+            'url' => '/sop/' . $sop->id
+        ]);
+
         return back()->with(
             'success',
-            'SOP ditolak'
+            'SOP berhasil ditolak'
         );
     }
 
@@ -91,5 +104,74 @@ class DashboardController extends Controller
             ->get();
 
         return view('dashboard.arsip', compact('arsip'));
+    }
+
+    public function dashboardKepala()
+    {
+        $menunggu = Sop::where('status', 'disetujui')->count();
+
+        $disahkan = Sop::where('status', 'disahkan')->count();
+
+        $totalSop = Sop::count();
+
+        $sops = Sop::where('status', 'disetujui')
+                    ->latest()
+                    ->take(5)
+                    ->get();
+
+        return view(
+            'dashboard.kepala',
+            compact(
+                'menunggu',
+                'disahkan',
+                'totalSop',
+                'sops'
+            )
+        );
+    }
+
+    public function persetujuanKepala()
+    {
+        $sops = Sop::where('status', 'disetujui')
+            ->latest()
+            ->get();
+
+        return view(
+            'dashboard.persetujuan',
+            compact('sops')
+        );
+    }
+
+
+    public function approveKepala($id)
+    {
+        $sop = Sop::findOrFail($id);
+
+        $user = auth()->user();
+
+        $sop->status = 'disahkan';
+
+        $sop->disahkan_oleh = $user->name;
+
+        $sop->nip_pengesah = $user->nip;
+
+        $sop->save();
+
+        return back()->with(
+            'success',
+            'SOP berhasil disahkan'
+        );
+    }
+
+    public function arsipKepala()
+    {
+        $sops = Sop::where('status', 'disahkan')
+                    ->latest()
+                    ->get();
+
+        return view(
+            'dashboard.arsip-kepala',
+            compact('sops')
+        );
     }
 }

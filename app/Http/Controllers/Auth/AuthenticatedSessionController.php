@@ -42,6 +42,12 @@ class AuthenticatedSessionController extends Controller
 
         }
 
+        elseif($user->role == 'kepala'){
+
+            return redirect('/dashboard-kepala');
+
+        }
+
         else{
 
             return redirect('/dashboard');
