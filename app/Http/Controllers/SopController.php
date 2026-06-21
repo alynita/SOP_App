@@ -44,8 +44,9 @@ class SopController extends Controller
 
                     
 
-        // 🔔 AMBIL NOTIF
+        // 🔔 AMBIL NOTIF (hanya yang belum dibaca)
         $notifications = Notification::where('user_id', auth()->id())
+            ->where('is_read', false)
             ->latest()
             ->get();
 
@@ -62,153 +63,113 @@ class SopController extends Controller
         );
     }
 
-    // STEP 1 - FORM SOP
     public function create()
     {
         return view('sop.create');
     }
 
-    // SIMPAN STEP 1
     public function store(Request $request)
     {
         $data = $request->all();
 
         $data['status'] = 'draft';
-
         $data['user_id'] = auth()->id();
-
         $data['timker_id'] = auth()->user()->role;
+
+        $data['no_sop'] = null;
+        $data['tgl_revisi'] = null;
+        $data['tgl_efektif'] = null;
 
         $sop = Sop::create($data);
 
-        return redirect('/sop/' . $sop->id . '/dasar-hukum');
-    }
+        // ======================
+        // SIMPAN SEMUA DETAIL SEKALIGUS
+        // ======================
 
-    // ========================
-    // STEP 2 - DASAR HUKUM
-    public function dasarHukum($id)
-    {
-        return view('sop.dasar_hukum', compact('id'));
-    }
-
-    public function storeDasarHukum(Request $request, $id)
-    {
-        foreach ($request->dasar_hukum as $item) {
+        // DASAR HUKUM
+        foreach ($request->dasar_hukum ?? [] as $item) {
             if ($item) {
                 DasarHukum::create([
-                    'sop_id' => $id,
+                    'sop_id' => $sop->id,
                     'isi' => $item
                 ]);
             }
         }
 
-        return redirect('/sop/' . $id . '/kualifikasi');
-    }
-
-    // ========================
-    // STEP 3 - KUALIFIKASI
-    public function kualifikasi($id)
-    {
-        return view('sop.kualifikasi', compact('id'));
-    }
-
-    public function storeKualifikasi(Request $request, $id)
-    {
-        foreach ($request->kualifikasi as $item) {
+        // KUALIFIKASI
+        foreach ($request->kualifikasi ?? [] as $item) {
             if ($item) {
                 KualifikasiPelaksana::create([
-                    'sop_id' => $id,
+                    'sop_id' => $sop->id,
                     'isi' => $item
                 ]);
             }
         }
 
-        return redirect('/sop/' . $id . '/keterkaitan');
-    }
-
-    // ========================
-    // STEP 4 - KETERKAITAN
-    public function keterkaitan($id)
-    {
-        return view('sop.keterkaitan', compact('id'));
-    }
-
-    public function storeKeterkaitan(Request $request, $id)
-    {
-        foreach ($request->keterkaitan as $item) {
+        // KETERKAITAN
+        foreach ($request->keterkaitan ?? [] as $item) {
             if ($item) {
                 Keterkaitan::create([
-                    'sop_id' => $id,
+                    'sop_id' => $sop->id,
                     'isi' => $item
                 ]);
             }
         }
 
-        return redirect('/sop/' . $id . '/peralatan');
-    }
-
-    // ========================
-    // STEP 5 - PERALATAN
-    public function peralatan($id)
-    {
-        return view('sop.peralatan', compact('id'));
-    }
-
-    public function storePeralatan(Request $request, $id)
-    {
-        foreach ($request->peralatan as $item) {
+        // PERALATAN
+        foreach ($request->peralatan ?? [] as $item) {
             if ($item) {
                 Peralatan::create([
-                    'sop_id' => $id,
+                    'sop_id' => $sop->id,
                     'isi' => $item
                 ]);
             }
         }
 
-        return redirect('/sop/' . $id . '/peringatan');
-    }
-
-    // ========================
-    // STEP 6 - PERINGATAN
-    public function peringatan($id)
-    {
-        return view('sop.peringatan', compact('id'));
-    }
-
-    public function storePeringatan(Request $request, $id)
-    {
-        foreach ($request->peringatan as $item) {
+        // PERINGATAN
+        foreach ($request->peringatan ?? [] as $item) {
             if ($item) {
                 Peringatan::create([
-                    'sop_id' => $id,
+                    'sop_id' => $sop->id,
                     'isi' => $item
                 ]);
             }
         }
 
-        return redirect('/sop/' . $id . '/pencatatan');
-    }
-
-    // ========================
-    // STEP 7 - PENCATATAN
-    public function pencatatan($id)
-    {
-        return view('sop.pencatatan', compact('id'));
-    }
-
-    public function storePencatatan(Request $request, $id)
-    {
-        foreach ($request->pencatatan as $item) {
+        // PENCATATAN
+        foreach ($request->pencatatan ?? [] as $item) {
             if ($item) {
                 Pencatatan::create([
-                    'sop_id' => $id,
+                    'sop_id' => $sop->id,
                     'isi' => $item
                 ]);
             }
         }
 
-        // 👉 terakhir ke OUTPUT
-        return redirect('/sop/' . $id);
+        $request->validate([
+            'nama_sop' => 'required',
+            'tgl_pembuatan' => 'required',
+
+            'dasar_hukum' => 'required|array|min:1',
+            'dasar_hukum.*' => 'required',
+
+            'kualifikasi' => 'required|array|min:1',
+            'kualifikasi.*' => 'required',
+
+            'keterkaitan' => 'required|array|min:1',
+            'keterkaitan.*' => 'required',
+
+            'peralatan' => 'required|array|min:1',
+            'peralatan.*' => 'required',
+
+            'peringatan' => 'required|array|min:1',
+            'peringatan.*' => 'required',
+
+            'pencatatan' => 'required|array|min:1',
+            'pencatatan.*' => 'required',
+        ]);
+
+        return redirect('/sop/' . $sop->id);
     }
 
     // ========================
@@ -307,65 +268,36 @@ class SopController extends Controller
             ->with('success', 'Proses SOP berhasil diupdate');
     }
 
-    public function approve($id)
-    {
-        $sop = Sop::findOrFail($id);
-
-        $user = auth()->user();
-
-        $sop->status = 'disetujui';
-
-        $sop->timker_approved_by = $user->name;
-        $sop->timker_approved_at = now();
-
-        $sop->save();
-
-        Notification::create([
-            'user_id' => $sop->user_id,
-            'pesan' => 'Dokumen SOP yang Anda ajukan telah disetujui oleh Penjaminan Mutu.',
-            'url' => '/sop/' . $sop->id
-        ]);
-
-        return back()->with('success', 'SOP disetujui Timker 4');
-    }
-
-    public function reject(Request $request, $id)
-    {
-        $sop = Sop::findOrFail($id);
-
-        $sop->status = 'ditolak';
-
-        $sop->catatan_revisi = $request->catatan_revisi;
-
-        $sop->save();
-
-        Notification::create([
-            'user_id' => $sop->user_id,
-            'pesan' => 'Dokumen SOP yang Anda ajukan memerlukan revisi. Silakan periksa kembali catatan yang diberikan.',
-            'url' => '/sop/' . $sop->id
-        ]);
-
-        return back()->with(
-            'success',
-            'SOP berhasil ditolak'
-        );
-    }
-
     public function edit($id)
     {
         $sop = Sop::findOrFail($id);
+
+        // kalau sudah dikunci orang lain
+        if ($sop->is_editing_by && $sop->is_editing_by !== auth()->user()->role) {
+            return redirect('/sop')->with('error', 'SOP sedang diedit oleh pihak lain');
+        }
+
+        // kunci oleh user yang sedang edit
+        $sop->is_editing_by = auth()->user()->role;
+        $sop->save();
+
         return view('sop.edit', compact('sop'));
     }
 
     public function update(Request $request, $id)
     {
         $sop = Sop::findOrFail($id);
+
+        // =========================
+        // 1. UPDATE SOP UTAMA
+        // =========================
         $sop->update($request->all());
 
-        // hapus lama dulu
-        DasarHukum::where('sop_id', $id)->delete();
+        // =========================
+        // 2. SIMPAN DETAIL ULANG
+        // =========================
 
-        // simpan ulang
+        DasarHukum::where('sop_id', $id)->delete();
         foreach ($request->dasar_hukum as $item) {
             if ($item) {
                 DasarHukum::create([
@@ -376,7 +308,6 @@ class SopController extends Controller
         }
 
         KualifikasiPelaksana::where('sop_id', $id)->delete();
-
         foreach ($request->kualifikasi as $item) {
             if ($item) {
                 KualifikasiPelaksana::create([
@@ -387,7 +318,6 @@ class SopController extends Controller
         }
 
         Keterkaitan::where('sop_id', $id)->delete();
-
         foreach ($request->keterkaitan as $item) {
             if ($item) {
                 Keterkaitan::create([
@@ -398,7 +328,6 @@ class SopController extends Controller
         }
 
         Peralatan::where('sop_id', $id)->delete();
-
         foreach ($request->peralatan as $item) {
             if ($item) {
                 Peralatan::create([
@@ -409,7 +338,6 @@ class SopController extends Controller
         }
 
         Peringatan::where('sop_id', $id)->delete();
-
         foreach ($request->peringatan as $item) {
             if ($item) {
                 Peringatan::create([
@@ -420,7 +348,6 @@ class SopController extends Controller
         }
 
         Pencatatan::where('sop_id', $id)->delete();
-
         foreach ($request->pencatatan as $item) {
             if ($item) {
                 Pencatatan::create([
@@ -430,12 +357,45 @@ class SopController extends Controller
             }
         }
 
-        // STATUS BALIK KE DRAFT
-        $sop->status = 'draft';
+        // =========================
+        // 3. STATUS LOGIC (DIPERBAIKI)
+        // =========================
+
+        $user = auth()->user();
+
+        if ($sop->status == 'ditolak') {
+
+            if (in_array($user->role, ['timker1','timker2','timker3','timker5','timker6'])) {
+                $sop->status = 'draft';
+
+            } elseif ($user->role == 'timker4') {
+                $sop->status = 'diajukan';
+            }
+
+        } else {
+            $sop->status = 'draft';
+        }
+
+        // =========================
+        // 4. LEPAS LOCK EDIT
+        // =========================
+        $sop->is_editing_by = null;
+
         $sop->save();
 
-        return redirect()->back()->with('success', 'Data berhasil diupdate');
+        // =========================
+        // 5. REDIRECT SESUAI ROLE
+        // =========================
 
+        if (in_array($user->role, ['timker1','timker2','timker3','timker4','timker5','timker6'])) {
+            return redirect('/dashboard')->with('success', 'SOP berhasil diperbarui');
+        }
+
+        if ($user->role == 'pm') {
+            return redirect('/dashboard-timker4')->with('success', 'SOP berhasil diperbarui, silakan klik Setujui jika sudah sesuai');
+        }
+
+        return redirect('/dashboard')->with('success', 'SOP berhasil diperbarui');
     }
 
     public function delete($id)
@@ -453,11 +413,10 @@ class SopController extends Controller
         $sop->status = 'diajukan';
         $sop->save();
 
-        // misalnya user penjamin mutu id = 2
         Notification::create([
-            'user_id' => 2,
+            'user_id' => 3,
             'pesan' => 'Dokumen SOP baru telah diajukan dan menunggu proses verifikasi.',
-            'url' => '/validasi-sop'
+            'url' => '/dashboard-timker4'
         ]);
 
         return redirect('/sop')->with('success', 'SOP berhasil diajukan');
@@ -489,56 +448,53 @@ class SopController extends Controller
                     'output' => $request->output[$i] ?? null,
                     'keterangan' => $request->keterangan[$i] ?? null,
                     'tipe' => !empty($request->tipe[$i]) ? $request->tipe[$i] : 'proses',
-                    'next_yes' => $request->next_yes[$i] ?? null,
-                    'next_no'  => $request->next_no[$i] ?? null,
                 ]);
 
                 $pelaksanaIds = [];
 
                 // =======================
-                // 1. DARI CHECKBOX
+                // DARI TOM SELECT (gabungan: ID lama + nama baru)
                 if (isset($request->pelaksana[$i]) && is_array($request->pelaksana[$i])) {
-                    foreach ($request->pelaksana[$i] as $idPelaksana) {
-                        if (!empty($idPelaksana)) {
-                            $pelaksanaIds[] = $idPelaksana;
+
+                    foreach ($request->pelaksana[$i] as $value) {
+
+                        if (empty($value)) {
+                            continue;
                         }
-                    }
-                }
 
-                // =======================
-                // 2. DARI INPUT MANUAL
-                if (isset($request->pelaksana_baru[$i])) {
+                        if (is_numeric($value)) {
+                            // pelaksana yang sudah ada di database
+                            $pelaksanaIds[] = $value;
 
-                    $inputBaru = implode(',', $request->pelaksana_baru[$i]);
-                    $listBaru = explode(',', $inputBaru);
+                        } else {
+                            // pelaksana baru yang diketik user (Tom Select create: true)
+                            $namaBaru = trim($value);
 
-                    foreach ($listBaru as $namaBaru) {
-                        $namaBaru = trim($namaBaru);
+                            if ($namaBaru) {
 
-                        if ($namaBaru) {
+                                $existing = Pelaksana::where('nama', $namaBaru)->first();
 
-                            $existing = Pelaksana::where('nama', $namaBaru)->first();
+                                if ($existing) {
+                                    $pelaksanaIds[] = $existing->id;
+                                } else {
+                                    $baru = Pelaksana::create([
+                                        'nama' => $namaBaru
+                                    ]);
 
-                            if ($existing) {
-                                $pelaksanaIds[] = $existing->id;
-                            } else {
-                                $baru = Pelaksana::create([
-                                    'nama' => $namaBaru
-                                ]);
-
-                                $pelaksanaIds[] = $baru->id;
+                                    $pelaksanaIds[] = $baru->id;
+                                }
                             }
                         }
                     }
                 }
 
                 // =======================
-                // 3. BERSIHKAN
+                // BERSIHKAN
                 $pelaksanaIds = array_filter($pelaksanaIds);
                 $pelaksanaIds = array_values($pelaksanaIds);
 
                 // =======================
-                // 4. SIMPAN
+                // SIMPAN
                 if (!empty($pelaksanaIds)) {
                     $kegiatan->pelaksana()->sync($pelaksanaIds);
                 }
@@ -546,6 +502,27 @@ class SopController extends Controller
         }
 
         return redirect('/sop/' . $id);
+    }
+
+    public function editMutu($id)
+    {
+        $sop = Sop::findOrFail($id);
+
+        return view('sop.edit_mutu', compact('sop'));
+    }
+
+    public function updateMutu(Request $request, $id)
+    {
+        $sop = Sop::findOrFail($id);
+
+        $sop->update([
+            'no_sop' => $request->no_sop,
+            'tgl_revisi' => $request->tgl_revisi,
+            'tgl_efektif' => $request->tgl_efektif,
+        ]);
+
+        return redirect('/dashboard-timker4')
+            ->with('success', 'Data SOP berhasil dilengkapi');
     }
 
     public function pdf($id)
@@ -625,12 +602,5 @@ class SopController extends Controller
         return response()->json([
             'success' => true
         ]);
-    }
-
-    public function excel($id)
-    {
-        $sop = Sop::findOrFail($id);
-
-        return view('sop.excel', compact('sop'));
     }
 }

@@ -90,15 +90,20 @@
                         Lihat
                     </a>
 
-                    {{-- JIKA DITOLAK --}}
-                    @if($s->status == 'ditolak')
-
+                @if($s->status == 'ditolak')
+    
+                    @if($s->is_editing_by && $s->is_editing_by !== auth()->user()->role)
+                        <button class="btn btn-secondary btn-sm" disabled>
+                            Sedang diedit
+                        </button>
+                    @else
                         <a href="/sop/{{ $s->id }}/edit"
                         class="btn btn-warning btn-sm">
                             Revisi
                         </a>
-
                     @endif
+
+                @endif
 
                     {{-- SETELAH DIREVISI --}}
                     @if($s->status == 'draft' && $s->catatan_revisi)

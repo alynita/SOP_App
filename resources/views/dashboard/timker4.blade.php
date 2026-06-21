@@ -92,7 +92,7 @@
                     <!-- APPROVE -->
                     <form action="/sop/{{ $s->id }}/approve" method="POST" style="display:inline;">
                         @csrf
-                        <button class="btn btn-success btn-sm">Approve</button>
+                        <button class="btn btn-success btn-sm">Setujui</button>
                     </form>
 
                     <!-- REJECT -->
@@ -127,6 +127,11 @@
                         </form>
 
                     </div>
+
+                    <a href="/sop/{{ $s->id }}/edit-mutu"
+                        class="btn btn-warning btn-sm">
+                        Lengkapi SOP
+                    </a>
                 </td>
             </tr>
             @endforeach

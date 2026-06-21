@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Sop;
 use App\Models\User;
+use App\Models\Notification;
+use App\Models\Pelaksana;
 
 class DashboardController extends Controller
 {
@@ -42,11 +44,15 @@ class DashboardController extends Controller
 
             'totalSop' => Sop::count(),
 
+            'totalPelaksana' => Pelaksana::count(),
+
             'disetujui' => Sop::where('status', 'disetujui')->count(),
 
             'ditolak' => Sop::where('status', 'ditolak')->count(),
 
             'diajukan' => Sop::where('status', 'diajukan')->count(),
+
+            'disahkan' => Sop::where('status', 'disahkan')->count(),
 
             'sops' => Sop::latest()->take(5)->get()
 
@@ -66,11 +72,27 @@ class DashboardController extends Controller
 
         $sop->save();
 
+        // =========================
+        // NOTIFIKASI KE TIM KERJA (pengaju)
+        // =========================
         Notification::create([
             'user_id' => $sop->user_id,
             'pesan' => 'Dokumen SOP yang Anda ajukan telah disetujui oleh Penjaminan Mutu.',
             'url' => '/sop/' . $sop->id
         ]);
+
+        // =========================
+        // NOTIFIKASI KE KEPALA BBPK
+        // =========================
+        $kepalaUsers = User::where('role', 'kepala')->get();
+
+        foreach ($kepalaUsers as $kepala) {
+            Notification::create([
+                'user_id' => $kepala->id,
+                'pesan' => 'Dokumen SOP baru telah disetujui Penjaminan Mutu dan menunggu pengesahan Anda.',
+                'url' => '/dashboard-kepala'
+            ]);
+        }
 
         return back()->with('success', 'SOP disetujui Timker 4');
     }
@@ -88,13 +110,22 @@ class DashboardController extends Controller
         Notification::create([
             'user_id' => $sop->user_id,
             'pesan' => 'Dokumen SOP yang Anda ajukan memerlukan revisi. Silakan periksa kembali catatan yang diberikan.',
-            'url' => '/sop/' . $sop->id
+            'url' => '/sop/edit' . $sop->id
         ]);
 
         return back()->with(
             'success',
             'SOP berhasil ditolak'
         );
+    }
+
+    public function revisi()
+    {
+        $sop = Sop::where('status', 'ditolak')
+            ->latest()
+            ->get();
+
+        return view('sop.revisi', compact('sop'));
     }
 
     public function arsip()
@@ -156,6 +187,12 @@ class DashboardController extends Controller
         $sop->nip_pengesah = $user->nip;
 
         $sop->save();
+
+        Notification::create([
+            'user_id' => $sop->user_id,
+            'pesan' => 'SOP kamu telah disahkan.',
+            'url' => '/sop/' . $sop->id
+        ]);
 
         return back()->with(
             'success',

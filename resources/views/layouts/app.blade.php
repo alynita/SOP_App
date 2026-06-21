@@ -107,13 +107,13 @@
         @if(auth()->user()->role == 'kepala')
 
             <a href="/dashboard-kepala">
-                🏠 Dashboard Kepala
+                🏠 Dashboard Kepala BBPK Jakarta
             </a>
 
             <div class="section">PENGESAHAN SOP</div>
 
             <a href="/kepala/persetujuan">
-                ✍️ Persetujuan SOP
+                ✍️ Pengesahan SOP
             </a>
 
             <a href="/kepala/arsip">
@@ -122,20 +122,20 @@
 
         @elseif(auth()->user()->role == 'admin')
 
-            <a href="/admin/dashboard">🏠 Dashboard Admin</a>
+            <a href="/admin/dashboard">🏠 Dashboard Administrator Sistem</a>
 
             <div class="section">ADMIN</div>
 
             <a href="/admin/users">👥 Data User</a>
 
-            <a href="/admin/monitoring">📊 Monitoring SOP</a>
+            <a href="/admin/pelaksana">🧑‍💼 Data Pelaksana</a>
 
-            <a href="/admin/pengaturan">⚙ Pengaturan Sistem</a>
+            <a href="/admin/monitoring">📊 Monitoring SOP</a>
 
         @else
 
             @if(auth()->user()->role == 'timker4')
-                <a href="/dashboard-timker4">🏠 Dashboard PM</a>
+                <a href="/dashboard-timker4">🏠 Dashboard Penjaminan Mutu</a>
             @else
                 <a href="/dashboard">🏠 Dashboard</a>
             @endif
@@ -150,7 +150,15 @@
             <a href="/sop">📄 Data SOP</a>
 
             @if(auth()->user()->role == 'timker4')
-                <a href="/timker4/arsip">🗂 Arsip SOP</a>
+
+                <a href="/timker4/revisi">
+                    📝 SOP Revisi
+                </a>
+
+                <a href="/timker4/arsip">
+                    🗂 Arsip SOP
+                </a>
+
             @endif
 
         @endif

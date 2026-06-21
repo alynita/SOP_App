@@ -112,13 +112,14 @@
                 <td width="60%" style="text-align:center;">
 
                     <img src="{{ asset('logo.png') }}"
-                        width="80"
+                        width="150"
                         class="mb-2">
 
                     <br>
 
-                    <b>KEMENTERIAN KESEHATAN REPUBLIK INDONESIA</b><br>
+                    <b>KEMENTERIAN KESEHATAN </b><br>
                     SEKRETARIAT JENDERAL<br>
+                    PUSAT PENGEMBANGAN KOMPETENSI APARATUR (P2KA) <br>
                     BALAI BESAR PELATIHAN KESEHATAN JAKARTA
 
                 </td>

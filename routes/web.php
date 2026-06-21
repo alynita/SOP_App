@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SopController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PelaksanaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -100,13 +101,20 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/admin/users/{id}',[UserController::class, 'destroy']);
     Route::get('/admin/monitoring',[UserController::class, 'monitoring']);
 
+    Route::get('/admin/pelaksana', [PelaksanaController::class, 'index']);
+    Route::get('/admin/pelaksana/create', [PelaksanaController::class, 'create']);
+    Route::post('/admin/pelaksana/store', [PelaksanaController::class, 'store']);
+    Route::get('/admin/pelaksana/{id}/edit', [PelaksanaController::class, 'edit']);
+    Route::put('/admin/pelaksana/{id}', [PelaksanaController::class, 'update']);
+    Route::delete('/admin/pelaksana/{id}', [PelaksanaController::class, 'destroy']);
+
     /*
     |------------------------------------------
     | SOP (INPUT & DATA)
     |------------------------------------------
     */
 
-    // 🔥 Input SOP (dipindah dari / ke sini)
+    // 🔥 Input SOP 
     Route::get('/sop/create', [SopController::class, 'create']);
     Route::post('/sop/store', [SopController::class, 'store']);
 
@@ -119,24 +127,6 @@ Route::middleware(['auth'])->group(function () {
     | STEP SOP
     |------------------------------------------
     */
-
-    Route::get('/sop/{id}/dasar-hukum', [SopController::class, 'dasarHukum']);
-    Route::post('/sop/{id}/dasar-hukum', [SopController::class, 'storeDasarHukum']);
-
-    Route::get('/sop/{id}/kualifikasi', [SopController::class, 'kualifikasi']);
-    Route::post('/sop/{id}/kualifikasi', [SopController::class, 'storeKualifikasi']);
-
-    Route::get('/sop/{id}/keterkaitan', [SopController::class, 'keterkaitan']);
-    Route::post('/sop/{id}/keterkaitan', [SopController::class, 'storeKeterkaitan']);
-
-    Route::get('/sop/{id}/peralatan', [SopController::class, 'peralatan']);
-    Route::post('/sop/{id}/peralatan', [SopController::class, 'storePeralatan']);
-
-    Route::get('/sop/{id}/peringatan', [SopController::class, 'peringatan']);
-    Route::post('/sop/{id}/peringatan', [SopController::class, 'storePeringatan']);
-
-    Route::get('/sop/{id}/pencatatan', [SopController::class, 'pencatatan']);
-    Route::post('/sop/{id}/pencatatan', [SopController::class, 'storePencatatan']);
 
     Route::get('/sop/{id}/kegiatan', [SopController::class, 'kegiatan']);
     Route::post('/sop/{id}/kegiatan', [SopController::class, 'storeKegiatan']);
@@ -173,8 +163,11 @@ Route::middleware(['auth'])->group(function () {
     |------------------------------------------
     */
 
+    Route::get('/sop/{id}/edit-mutu', [SopController::class, 'editMutu']);
+    Route::post('/sop/{id}/update-mutu', [SopController::class, 'updateMutu']);
     Route::post('/sop/{id}/approve', [DashboardController::class, 'approve']);
     Route::post('/sop/{id}/reject', [DashboardController::class, 'reject']);
+    Route::get('/timker4/revisi',[DashboardController::class, 'revisi']);
     Route::get('/timker4/arsip', [DashboardController::class, 'arsip']);
 
     /*

@@ -8,8 +8,8 @@
 
     <tr>
         <th>No</th>
-        <th>No SOP</th>
         <th>Nama SOP</th>
+        <th>Tanggal Pembuatan</th>
         <th>Status</th>
         <th>Aksi</th>
     </tr>
@@ -20,9 +20,9 @@
 
         <td>{{ $loop->iteration }}</td>
 
-        <td>{{ $sop->no_sop }}</td>
-
         <td>{{ $sop->nama_sop }}</td>
+
+        <td>{{ $sop->tgl_pembuatan }}</td>
 
         <td>
             @if($sop->status == 'draft')

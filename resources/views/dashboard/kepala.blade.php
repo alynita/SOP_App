@@ -152,7 +152,7 @@
     <a href="/kepala/persetujuan"
         class="btn btn-success">
 
-        ✍️ Persetujuan SOP
+        ✍️ Pengesahan SOP
 
     </a>
 

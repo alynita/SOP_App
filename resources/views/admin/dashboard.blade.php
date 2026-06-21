@@ -55,6 +55,18 @@
         </div>
     </div>
 
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-0 text-center bg-success text-white">
+            <div class="card-body">
+                <div style="font-size:35px;">✔</div>
+
+                <h6 class="mt-2">Disahkan</h6>
+
+                <h3>{{ $disahkan }}</h3>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- ================= GRAFIK ================= -->
@@ -115,6 +127,13 @@
                             Ditolak
                         </span>
 
+                    @elseif($s->status == 'disahkan')
+
+                        <span class="badge bg-success">
+                            Disahkan
+                        </span>
+                    
+
                     @else
 
                         <span class="badge bg-warning text-dark">
@@ -168,9 +187,14 @@
                     <b>{{ $totalUser }}</b>
                 </p>
 
+                <p class="mb-2">
+                    Total Pelaksana:
+                    <b>{{ $totalPelaksana }}</b>
+                </p>
+
                 <p class="mb-0">
                     SOP yang sudah diverifikasi:
-                    <b>{{ $disetujui }}</b>
+                    <b>{{ $disahkan }}</b>
                 </p>
 
             </div>
@@ -193,6 +217,15 @@
                     class="btn btn-outline-success btn-sm mb-2">
 
                     👥 Kelola User
+
+                </a>
+
+                <br>
+
+                <a href="/admin/pelaksana"
+                    class="btn btn-outline-success btn-sm mb-2">
+
+                    🧑‍💼 Data Pelaksana
 
                 </a>
 
@@ -239,7 +272,8 @@ new Chart(ctx, {
         labels: [
             'Diajukan',
             'Disetujui',
-            'Ditolak'
+            'Ditolak',
+            'Disahkan'
         ],
 
         datasets: [{
@@ -249,7 +283,8 @@ new Chart(ctx, {
             data: [
                 {{ $diajukan }},
                 {{ $disetujui }},
-                {{ $ditolak }}
+                {{ $ditolak }},
+                {{ $disahkan }}
             ],
 
             borderWidth: 1

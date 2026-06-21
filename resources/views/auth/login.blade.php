@@ -8,7 +8,7 @@
         <div class="text-center mb-10">
 
             <img
-                src="/logo.png"
+                src="/logo login.png"
                 alt="Logo BBPK Jakarta"
                 class="mx-auto h-48 object-contain mb-6"
             >
@@ -26,8 +26,10 @@
             </h1>
 
             <p class="text-lg text-gray-600">
-                (Elektronik Standar Operasional Prosedur)
+                (Elektronik Standar Operasional Prosedur) <br>
+                Balai Besar Pelatihan Kesehatan Jakarta </br>
             </p>
+            
 
         </div>
 

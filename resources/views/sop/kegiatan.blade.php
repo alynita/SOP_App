@@ -2,6 +2,8 @@
 
 @section('content')
 
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+
 <h5>Input Kegiatan SOP</h5>
 
 <form action="/sop/{{ $sop->id }}/kegiatan" method="POST">
@@ -10,6 +12,11 @@
 <div id="wrapper">
 
     <div class="item border p-3 mb-3">
+
+        <!-- HEADER + TOMBOL HAPUS -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong>Kegiatan</strong>
+        </div>
 
         <!-- KEGIATAN -->
         <label>Nama Kegiatan</label>
@@ -46,22 +53,16 @@
         <!-- PELAKSANA -->
         <h6>Pelaksana</h6>
 
-        @foreach($pelaksana as $p)
+        <select
+            name="pelaksana[0][]"
+            class="pelaksana-select form-control mb-2"
+            multiple>
 
-        <div>
-            <input type="checkbox"
-                name="pelaksana[0][]"
-                value="{{ $p->id }}">
+            @foreach($pelaksana as $p)
+                <option value="{{ $p->id }}">{{ $p->nama }}</option>
+            @endforeach
 
-            {{ $p->nama }}
-        </div>
-
-        @endforeach
-
-        <input type="text"
-            name="pelaksana_baru[0][]"
-            class="form-control mt-2"
-            placeholder="Tambah pelaksana baru (pisah koma)">
+        </select>
 
         <!-- TIPE -->
         <label>Tipe Flowchart</label>
@@ -109,6 +110,17 @@
 
         </div>
 
+        <!-- TOMBOL HAPUS -->
+        <button
+            type="button"
+            onclick="hapus(this)"
+            class="btn btn-danger btn-sm hapus-btn mt-2"
+            style="display:none;">
+
+            Hapus Kegiatan Ini
+
+        </button>
+
     </div>
 
 </div>
@@ -129,9 +141,28 @@
 
 </form>
 
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
 <script>
 
 let index = 1;
+
+// =========================
+// INIT TOM SELECT
+// =========================
+function initPelaksanaSelect(el){
+
+    return new TomSelect(el, {
+        plugins: ['remove_button'],
+        create: true,
+        createOnBlur: true,
+        persist: false,
+        maxOptions: null,
+        placeholder: 'Cari atau pilih pelaksana...'
+    });
+}
+
+document.querySelectorAll('.pelaksana-select').forEach(initPelaksanaSelect);
 
 // =========================
 // TAMBAH FORM
@@ -150,27 +181,14 @@ function tambah(){
         'input[type="text"], textarea'
     ).forEach(el => el.value = '');
 
-    // RESET CHECKBOX
-    item.querySelectorAll(
-        'input[type="checkbox"]'
-    ).forEach(el => {
+    // BERSIHKAN sisa Tom Select hasil clone
+    item.querySelectorAll('.ts-wrapper').forEach(el => el.remove());
 
-        el.checked = false;
-
-        el.name =
-            "pelaksana["+index+"][]";
-    });
-
-    // RESET PELAKSANA BARU
-    item.querySelectorAll(
-        'input[name^="pelaksana_baru"]'
-    ).forEach(el => {
-
-        el.value = '';
-
-        el.name =
-            "pelaksana_baru["+index+"][]";
-    });
+    let pelaksanaSelect = item.querySelector('select[name^="pelaksana"]');
+    pelaksanaSelect.name = "pelaksana["+index+"][]";
+    pelaksanaSelect.querySelectorAll('option').forEach(opt => opt.selected = false);
+    pelaksanaSelect.style.display = '';
+    pelaksanaSelect.classList.remove('tomselected', 'ts-hidden-accessible');
 
     // RESET TIPE
     item.querySelectorAll(
@@ -183,9 +201,25 @@ function tambah(){
         el.selectedIndex = 0;
     });
 
+    // TAMPILKAN TOMBOL HAPUS pada baris baru
+    let hapusBtn = item.querySelector('.hapus-btn');
+    hapusBtn.style.display = 'inline-block';
+
     wrapper.appendChild(item);
 
+    initPelaksanaSelect(pelaksanaSelect);
+
     index++;
+}
+
+// =========================
+// HAPUS FORM
+// =========================
+function hapus(btn){
+
+    let item = btn.closest('.item');
+
+    item.remove();
 }
 
 </script>

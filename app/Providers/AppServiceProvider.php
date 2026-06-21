@@ -29,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
                     'user_id',
                     auth()->id()
                 )
+                ->where('is_read', false)
                 ->latest()
                 ->get();
 
