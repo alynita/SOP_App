@@ -22,9 +22,10 @@
         class="form-control mb-2"
         placeholder="Password">
 
-<select name="role"
-        class="form-control mb-3">
+<select name="role" 
+        class="form-control mb-3" required>
 
+        <option value="" disabled selected>-- Pilih Role --</option>
         <option value="admin">Admin</option>
         <option value="timker1">Timker 1</option>
         <option value="timker2">Timker 2</option>

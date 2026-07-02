@@ -22,6 +22,10 @@
                 Semua Status
             </option>
 
+            <option value="draft">
+                Draft
+            </option>
+
             <option value="diajukan">
                 Diajukan
             </option>
@@ -32,6 +36,10 @@
 
             <option value="ditolak">
                 Ditolak
+            </option>
+
+            <option value="disahkan">
+                Disahkan
             </option>
 
         </select>
@@ -103,12 +111,17 @@
                 <td>{{ $s->nama_sop }}</td>
 
                 <td>
-                    Timker {{ $s->user_id }}
+                    {{ $s->user->name }}
                 </td>
 
                 <td>
+                    @if($s->status == 'draft')
 
-                    @if($s->status == 'disetujui')
+                        <span class="badge bg-success">
+                            draft
+                        </span>
+
+                    @elseif($s->status == 'disetujui')
 
                         <span class="badge bg-success">
                             Disetujui
@@ -120,10 +133,16 @@
                             Ditolak
                         </span>
 
+                    @elseif($s->status == 'disahkan')
+
+                        <span class="badge bg-warning text-dark">
+                            Disahkan
+                        </span>
+
                     @else
 
                         <span class="badge bg-warning text-dark">
-                            Diajukan
+                            Disahkan
                         </span>
 
                     @endif

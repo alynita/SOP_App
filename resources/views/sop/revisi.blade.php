@@ -34,7 +34,7 @@
 
             {{-- LIHAT DETAIL --}}
             <a href="/sop/{{ $s->id }}"
-               class="btn btn-info btn-sm">
+                class="btn btn-info btn-sm">
                 Lihat
             </a>
         </td>

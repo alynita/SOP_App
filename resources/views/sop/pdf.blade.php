@@ -64,186 +64,157 @@ body{
 <!-- ================= HALAMAN 1 ================= -->
 
 <table class="sop-table">
+    <tr>
+        <td width="60%" class="text-center">
+            <img src="{{ public_path('logo.png') }}"
+            width="150">
+            <br><br>
+            <b>KEMENTERIAN KESEHATAN </b><br>
+                SEKRETARIAT JENDERAL<br>
+                PUSAT PENGEMBANGAN KOMPETENSI APARATUR (P2KA) <br>
+                BALAI BESAR PELATIHAN KESEHATAN JAKARTA
+        </td>
+        
+        <td width="40%">
+            <table style="width:100%; border-collapse:collapse;">
+                <tr>
+                    <td>Nomor SOP</td>
+                    <td>: {{ $sop->no_sop }}</td>
+                </tr>
+                
+                <tr>
+                    <td>Tgl. Pembuatan</td>
+                    <td>: {{ $sop->tgl_pembuatan }}</td>
+                </tr>
+                
+                <tr>
+                    <td>Tgl. Revisi</td>
+                    <td>: {{ $sop->tgl_revisi }}</td>
+                </tr>
+                
+                <tr>
+                    <td>Tgl. Efektif</td>
+                    <td>: {{ $sop->tgl_efektif }}</td>
+                </tr>
 
-<tr>
+                <tr>
+                    <td>Disetujui Oleh</td>
+                    <td>:</td>
+                </tr>
 
-<td width="60%" class="text-center">
+                <tr>
+                    <td colspan="2" class="text-center">
+                        Penjaminan Mutu
+                        <br>
 
-<img src="{{ public_path('logo.png') }}"
-width="80">
-
-<br><br>
-
-<b>
-KEMENTERIAN KESEHATAN REPUBLIK INDONESIA
-</b>
-
-<br>
-
-SEKRETARIAT JENDERAL
-
-<br>
-
-BALAI BESAR PELATIHAN KESEHATAN JAKARTA
-
-</td>
-
-<td width="40%">
-
-<table style="width:100%; border-collapse:collapse;">
-
-<tr>
-<td>Nomor SOP</td>
-<td>: {{ $sop->no_sop }}</td>
-</tr>
-
-<tr>
-<td>Tgl. Pembuatan</td>
-<td>: {{ $sop->tgl_pembuatan }}</td>
-</tr>
-
-<tr>
-<td>Tgl. Revisi</td>
-<td>: {{ $sop->tgl_revisi }}</td>
-</tr>
-
-<tr>
-<td>Tgl. Efektif</td>
-<td>: {{ $sop->tgl_efektif }}</td>
-</tr>
-
-<tr>
-<td>Disahkan Oleh</td>
-<td>:</td>
-</tr>
-
-<tr>
-<td colspan="2" class="text-center">
-
-Kepala BBPK Jakarta
-
-<br><br><br><br>
-
-<b>
-{{ $sop->disahkan_oleh ?? '-' }}
-</b>
-
-<br>
-
-NIP.
-{{ $sop->nip_pengesah ?? '-' }}
-
-</td>
-</tr>
-
-<tr>
-<td>Nama SOP</td>
-<td>: {{ $sop->nama_sop }}</td>
-</tr>
-
-</table>
-
-</td>
-
-</tr>
-
+                        <img
+                            src="{{ asset('ttd-pm.jpg') }}"
+                            width="50">
+                        <br>
+                        <b>
+                            {{ $sop->timker_approved_by ?? '-' }}
+                        </b>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>Disahkan Oleh</td>
+                    <td>:</td>
+                </tr>
+                
+                <tr>
+                    <td colspan="2" class="text-center">
+                        Kepala BBPK Jakarta
+                        <br>
+                        <img
+                            src="{{ asset('ttd-kepala.jpg') }}"
+                            width="50">
+                        <br>
+                        <b>
+                            {{ $sop->disahkan_oleh ?? '-' }}
+                        </b>
+                        <br>
+                        NIP.
+                        {{ $sop->nip_pengesah ?? '-' }}
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>Nama SOP</td>
+                    <td>: {{ $sop->nama_sop }}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
 </table>
 
 <br>
 
 <table class="sop-table">
-
-<tr>
-
-<td width="50%">
-
-<b>Dasar Hukum</b>
-
-<ol>
-@foreach($sop->dasarHukum as $d)
-<li>{{ $d->isi }}</li>
-@endforeach
-</ol>
-
-</td>
-
-<td width="50%">
-
-<b>Kualifikasi Pelaksana</b>
-
-<ol>
-@foreach($sop->kualifikasis as $k)
-<li>{{ $k->isi }}</li>
-@endforeach
-</ol>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<b>Keterkaitan</b>
-
-<ol>
-@foreach($sop->keterkaitans as $k)
-<li>{{ $k->isi }}</li>
-@endforeach
-</ol>
-
-</td>
-
-<td>
-
-<b>Peralatan</b>
-
-<ol>
-@foreach($sop->peralatans as $p)
-<li>{{ $p->isi }}</li>
-@endforeach
-</ol>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<b>Peringatan</b>
-
-<ol>
-@foreach($sop->peringatans as $p)
-<li>{{ $p->isi }}</li>
-@endforeach
-</ol>
-
-</td>
-
-<td>
-
-<b>Pencatatan</b>
-
-<ol>
-@foreach($sop->pencatatans as $p)
-<li>{{ $p->isi }}</li>
-@endforeach
-</ol>
-
-</td>
-
-</tr>
-
+    <tr>
+        <td width="50%">
+            <b>Dasar Hukum</b>
+            <ol>
+                @foreach($sop->dasarHukum as $d)
+                <li>{{ $d->isi }}</li>
+                @endforeach
+            </ol>
+        </td>
+        
+        <td width="50%">
+            <b>Kualifikasi Pelaksana</b>
+            <ol>
+                @foreach($sop->kualifikasis as $k)
+                <li>{{ $k->isi }}</li>
+                @endforeach
+            </ol>
+        </td>
+    </tr>
+    
+    <tr>
+        <td>
+            <b>Keterkaitan</b>
+            <ol>
+                @foreach($sop->keterkaitans as $k)
+                <li>{{ $k->isi }}</li>
+                @endforeach
+            </ol>
+        </td>
+        
+        <td>
+            <b>Peralatan</b>
+            <ol>
+                @foreach($sop->peralatans as $p)
+                <li>{{ $p->isi }}</li>
+                @endforeach
+            </ol>
+        </td>
+    </tr>
+    
+    <tr>
+        <td>
+            <b>Peringatan</b>
+            <ol>
+                @foreach($sop->peringatans as $p)
+                <li>{{ $p->isi }}</li>
+                @endforeach
+            </ol>
+        </td>
+        
+        <td>
+            <b>Pencatatan</b>
+            <ol>
+                @foreach($sop->pencatatans as $p)
+                <li>{{ $p->isi }}</li>
+                @endforeach
+            </ol>
+        </td>
+    </tr>
 </table>
 
 <!-- ================= HALAMAN 2 ================= -->
 
-<div class="page-break"></div>
 
-<h4>Proses SOP</h4>
 
 <img
     src="{{ public_path('flowcharts/flowchart_'.$sop->id.'.png') }}"

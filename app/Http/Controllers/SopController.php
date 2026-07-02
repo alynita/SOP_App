@@ -70,82 +70,9 @@ class SopController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->all();
-
-        $data['status'] = 'draft';
-        $data['user_id'] = auth()->id();
-        $data['timker_id'] = auth()->user()->role;
-
-        $data['no_sop'] = null;
-        $data['tgl_revisi'] = null;
-        $data['tgl_efektif'] = null;
-
-        $sop = Sop::create($data);
-
         // ======================
-        // SIMPAN SEMUA DETAIL SEKALIGUS
+        // VALIDASI DULU
         // ======================
-
-        // DASAR HUKUM
-        foreach ($request->dasar_hukum ?? [] as $item) {
-            if ($item) {
-                DasarHukum::create([
-                    'sop_id' => $sop->id,
-                    'isi' => $item
-                ]);
-            }
-        }
-
-        // KUALIFIKASI
-        foreach ($request->kualifikasi ?? [] as $item) {
-            if ($item) {
-                KualifikasiPelaksana::create([
-                    'sop_id' => $sop->id,
-                    'isi' => $item
-                ]);
-            }
-        }
-
-        // KETERKAITAN
-        foreach ($request->keterkaitan ?? [] as $item) {
-            if ($item) {
-                Keterkaitan::create([
-                    'sop_id' => $sop->id,
-                    'isi' => $item
-                ]);
-            }
-        }
-
-        // PERALATAN
-        foreach ($request->peralatan ?? [] as $item) {
-            if ($item) {
-                Peralatan::create([
-                    'sop_id' => $sop->id,
-                    'isi' => $item
-                ]);
-            }
-        }
-
-        // PERINGATAN
-        foreach ($request->peringatan ?? [] as $item) {
-            if ($item) {
-                Peringatan::create([
-                    'sop_id' => $sop->id,
-                    'isi' => $item
-                ]);
-            }
-        }
-
-        // PENCATATAN
-        foreach ($request->pencatatan ?? [] as $item) {
-            if ($item) {
-                Pencatatan::create([
-                    'sop_id' => $sop->id,
-                    'isi' => $item
-                ]);
-            }
-        }
-
         $request->validate([
             'nama_sop' => 'required',
             'tgl_pembuatan' => 'required',
@@ -169,7 +96,83 @@ class SopController extends Controller
             'pencatatan.*' => 'required',
         ]);
 
-        return redirect('/sop/' . $sop->id);
+        // ======================
+        // DATA SOP
+        // ======================
+        $data = $request->all();
+
+        $data['status'] = 'draft';
+        $data['user_id'] = auth()->id();
+        $data['timker_id'] = auth()->user()->role;
+
+        $data['no_sop'] = null;
+        $data['tgl_revisi'] = null;
+        $data['tgl_efektif'] = null;
+
+        $sop = Sop::create($data);
+
+        // ======================
+        // DASAR HUKUM
+        // ======================
+        foreach ($request->dasar_hukum as $item) {
+            DasarHukum::create([
+                'sop_id' => $sop->id,
+                'isi' => $item
+            ]);
+        }
+
+        // ======================
+        // KUALIFIKASI
+        // ======================
+        foreach ($request->kualifikasi as $item) {
+            KualifikasiPelaksana::create([
+                'sop_id' => $sop->id,
+                'isi' => $item
+            ]);
+        }
+
+        // ======================
+        // KETERKAITAN
+        // ======================
+        foreach ($request->keterkaitan as $item) {
+            Keterkaitan::create([
+                'sop_id' => $sop->id,
+                'isi' => $item
+            ]);
+        }
+
+        // ======================
+        // PERALATAN
+        // ======================
+        foreach ($request->peralatan as $item) {
+            Peralatan::create([
+                'sop_id' => $sop->id,
+                'isi' => $item
+            ]);
+        }
+
+        // ======================
+        // PERINGATAN
+        // ======================
+        foreach ($request->peringatan as $item) {
+            Peringatan::create([
+                'sop_id' => $sop->id,
+                'isi' => $item
+            ]);
+        }
+
+        // ======================
+        // PENCATATAN
+        // ======================
+        foreach ($request->pencatatan as $item) {
+            Pencatatan::create([
+                'sop_id' => $sop->id,
+                'isi' => $item
+            ]);
+        }
+
+        return redirect('/sop/' . $sop->id)
+                ->with('success', 'SOP berhasil disimpan');
     }
 
     // ========================
@@ -192,7 +195,7 @@ class SopController extends Controller
                 ->where('kegiatan.sop_id', $sop->id)
                 ->pluck('pelaksana_id')
         )
-        ->orderBy('urutan', 'asc') // 🔥 INI KUNCINYA
+        ->orderBy('urutan', 'asc') 
         ->get();
 
         return view('sop.show', compact('sop', 'pelaksanas'));
@@ -201,7 +204,7 @@ class SopController extends Controller
     public function index(Request $request)
     {
         $search = $request->search;
-        $userId = auth()->id(); // 🔥 ambil user login
+        $userId = auth()->id(); 
 
         $sops = Sop::where('user_id', $userId)
                     ->where(function ($query) use ($search) {

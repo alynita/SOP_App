@@ -128,16 +128,41 @@
 
 <script>
 function tambah(wrapperId, name) {
+
     let wrapper = document.getElementById(wrapperId);
 
+    let inputs = wrapper.querySelectorAll('input');
+
+    for (let input of inputs) {
+        if (input.value.trim() === '') {
+            alert('Isi dulu kolom yang masih kosong!');
+            input.focus();
+            return;
+        }
+    }
+
     let div = document.createElement('div');
-    div.classList.add('mb-2');
+
+    div.classList.add('d-flex', 'mb-2', 'gap-2');
 
     div.innerHTML = `
-        <input type="text" name="${name}" class="form-control form-control-sm">
+        <input type="text"
+                name="${name}"
+                class="form-control form-control-sm"
+                required>
+
+        <button type="button"
+                class="btn btn-danger btn-sm"
+                onclick="hapusBaris(this)">
+            Hapus
+        </button>
     `;
 
     wrapper.appendChild(div);
+}
+
+function hapusBaris(button) {
+    button.parentElement.remove();
 }
 
 document.querySelector('form').addEventListener('submit', function(e){

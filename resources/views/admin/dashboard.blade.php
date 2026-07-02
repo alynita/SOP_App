@@ -32,25 +32,13 @@
     </div>
 
     <div class="col-md-3 mb-3">
-        <div class="card shadow-sm border-0 text-center bg-success text-white">
+        <div class="card shadow-sm border-0 text-center">
             <div class="card-body">
-                <div style="font-size:35px;">✔</div>
+                <div style="font-size:35px;">🧑‍💼</div>
 
-                <h6 class="mt-2">Disetujui</h6>
+                <h6 class="mt-2">Total Pelaksana</h6>
 
-                <h3>{{ $disetujui }}</h3>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm border-0 text-center bg-danger text-white">
-            <div class="card-body">
-                <div style="font-size:35px;">✖</div>
-
-                <h6 class="mt-2">Ditolak</h6>
-
-                <h3>{{ $ditolak }}</h3>
+                <h3>{{ $totalPelaksana }}</h3>
             </div>
         </div>
     </div>
@@ -115,7 +103,13 @@
 
                 <td>
 
-                    @if($s->status == 'disetujui')
+                    @if($s->status == 'draft')
+
+                        <span class="badge bg-success">
+                            Draft
+                        </span
+
+                    @elseif($s->status == 'disetujui')
 
                         <span class="badge bg-success">
                             Disetujui
@@ -270,6 +264,7 @@ new Chart(ctx, {
     data: {
 
         labels: [
+            'draft',
             'Diajukan',
             'Disetujui',
             'Ditolak',
@@ -281,6 +276,7 @@ new Chart(ctx, {
             label: 'Jumlah SOP',
 
             data: [
+                {{ $draft }},
                 {{ $diajukan }},
                 {{ $disetujui }},
                 {{ $ditolak }},

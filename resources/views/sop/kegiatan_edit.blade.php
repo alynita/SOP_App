@@ -51,27 +51,19 @@
     <!-- PELAKSANA -->
     <h6>Pelaksana</h6>
 
-    @foreach($pelaksana as $p)
+    <select
+        name="pelaksana[{{ $i }}][]"
+        class="pelaksana-select form-control mb-2"
+        multiple>
 
-    <div>
-        <input type="checkbox"
-            name="pelaksana[{{ $i }}][]"
-            value="{{ $p->id }}"
+        @foreach($pelaksana as $p)
+            <option value="{{ $p->id }}"
+                @if($k->pelaksana->contains($p->id)) selected @endif>
+                {{ $p->nama }}
+            </option>
+        @endforeach
 
-            @if($k->pelaksana->contains($p->id))
-                checked
-            @endif
-        >
-
-        {{ $p->nama }}
-    </div>
-
-    @endforeach
-
-    <input type="text"
-        name="pelaksana_baru[{{ $i }}][]"
-        class="form-control mt-2"
-        placeholder="Tambah pelaksana baru (pisah koma)">
+    </select>
 
     <!-- TIPE -->
     <label>Tipe Flowchart</label>
@@ -117,6 +109,13 @@
 
     </div>
 
+    <button
+        type="button"
+        onclick="hapus(this)"
+        class="btn btn-danger btn-sm mt-2">
+        Hapus Kegiatan Ini
+    </button>
+
 </div>
 
 @endforeach
@@ -139,62 +138,72 @@
 
 </form>
 
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
 <script>
 
 let index = {{ $sop->kegiatan->count() }};
+
+// =========================
+// INIT TOM SELECT
+// =========================
+function initPelaksanaSelect(el){
+    return new TomSelect(el, {
+        plugins: ['remove_button'],
+        create: true,
+        createOnBlur: true,
+        persist: false,
+        maxOptions: null,
+        placeholder: 'Cari atau pilih pelaksana...'
+    });
+}
+
+// Init semua select yang udah ada (dari loop kegiatan)
+document.querySelectorAll('.pelaksana-select').forEach(initPelaksanaSelect);
 
 // =========================
 // TAMBAH FORM
 // =========================
 function tambah(){
 
-    let wrapper =
-        document.getElementById('wrapper');
+    let wrapper = document.getElementById('wrapper');
 
-    let item =
-        document.querySelector('.item')
-        .cloneNode(true);
+    let item = document.querySelector('.item').cloneNode(true);
 
     // RESET TEXT & TEXTAREA
-    item.querySelectorAll(
-        'input[type="text"], textarea'
-    ).forEach(el => el.value = '');
+    item.querySelectorAll('input[type="text"], textarea')
+        .forEach(el => el.value = '');
 
-    item.querySelectorAll(
-        'input[type="checkbox"]'
-    ).forEach(el => {
+    // BERSIHKAN Tom Select hasil clone
+    item.querySelectorAll('.ts-wrapper').forEach(el => el.remove());
 
-        el.checked = false;
-
-        el.name =
-            "pelaksana["+index+"][]";
-    });
-
-    // RESET PELAKSANA BARU
-    item.querySelectorAll(
-    'input[name^="pelaksana_baru"]'
-    ).forEach(el => {
-
-        el.value = '';
-
-        el.name =
-            "pelaksana_baru["+index+"][]";
-    });
+    // RESET & rename pelaksana select
+    let pelaksanaSelect = item.querySelector('select[name^="pelaksana"]');
+    pelaksanaSelect.name = "pelaksana["+index+"][]";
+    pelaksanaSelect.querySelectorAll('option').forEach(opt => opt.selected = false);
+    pelaksanaSelect.style.display = '';
+    pelaksanaSelect.classList.remove('tomselected', 'ts-hidden-accessible');
 
     // RESET TIPE
-    item.querySelectorAll(
-        'select[name^="tipe"]'
-    ).forEach(el => {
-
-        el.name =
-            "tipe["+index+"]";
-
+    item.querySelectorAll('select[name^="tipe"]').forEach(el => {
+        el.name = "tipe["+index+"]";
         el.selectedIndex = 0;
     });
 
     wrapper.appendChild(item);
 
+    // Init Tom Select di form baru
+    initPelaksanaSelect(pelaksanaSelect);
+
     index++;
+}
+
+// =========================
+// HAPUS FORM
+// =========================
+function hapus(btn){
+    btn.closest('.item').remove();
 }
 
 </script>

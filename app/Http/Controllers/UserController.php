@@ -99,31 +99,22 @@ class UserController extends Controller
 
     public function monitoring(Request $request)
     {
-        $query = Sop::query();
+        $query = Sop::with('user');
 
         // FILTER STATUS
-        if($request->status){
-
-            $query->where(
-                'status',
-                $request->status
-            );
+        if ($request->status) {
+            $query->where('status', $request->status);
         }
 
-        // FILTER TIMKER
-        if($request->timker){
-
-            $query->where(
-                'timker_id',
-                $request->timker
-            );
+        // FILTER TIMKER (PAKAI RELASI USER)
+        if ($request->timker) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('name', 'Timker ' . $request->timker);
+            });
         }
 
         $sops = $query->latest()->get();
 
-        return view(
-            'admin.users.monitoring',
-            compact('sops')
-        );
+        return view('admin.users.monitoring', compact('sops'));
     }
 }

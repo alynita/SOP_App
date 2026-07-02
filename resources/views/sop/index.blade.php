@@ -35,11 +35,6 @@
                 PDF
             </a>
 
-            <a href="/sop/{{ $sop->id }}/excel"
-            class="btn btn-primary btn-sm">
-                Excel
-            </a>
-
             <a href="/sop/{{ $sop->id }}/delete"
             class="btn btn-danger btn-sm">
                 Hapus

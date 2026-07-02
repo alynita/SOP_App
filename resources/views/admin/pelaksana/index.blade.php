@@ -18,6 +18,15 @@
     <div class="alert alert-danger">{{ session('error') }}</div>
 @endif
 
+{{-- SEARCH BAR --}}
+<div class="mb-3">
+    <input
+        type="text"
+        id="searchInput"
+        class="form-control"
+        placeholder="Cari nama pelaksana...">
+</div>
+
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
@@ -26,7 +35,7 @@
             <th style="width:150px;">Aksi</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="tableBody">
         @forelse($pelaksana as $p)
         <tr>
             <td>{{ $loop->iteration }}</td>
@@ -51,5 +60,17 @@
         @endforelse
     </tbody>
 </table>
+
+<script>
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    let keyword = this.value.toLowerCase();
+    let rows = document.querySelectorAll('#tableBody tr');
+
+    rows.forEach(row => {
+        let nama = row.cells[1]?.textContent.toLowerCase() ?? '';
+        row.style.display = nama.includes(keyword) ? '' : 'none';
+    });
+});
+</script>
 
 @endsection

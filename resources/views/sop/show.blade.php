@@ -12,6 +12,7 @@
         border: 1px solid black;
         padding: 5px;
         font-size: 12px;
+        vertical-align: top;
     }
 
     .flow-cell{
@@ -694,73 +695,37 @@ window.addEventListener("load", () => {
         const a = getRect(from);
         const b = getRect(to);
 
+        const startX = a.left;
         const startY = a.centerY;
-        const endY = b.centerY;
 
-        const targetIsLeft =
-            b.centerX < a.centerX;
+        const isDecision = to.classList.contains('flow-decision');
 
-        let d = '';
+        const OFFSET = 15; 
 
-        // posisi tulisan
-        let labelX = 0;
-        let labelY = startY - 10;
+        let endX, endY;
 
-        // =====================================
-        // LOOP KIRI
-        // =====================================
-
-        if(targetIsLeft){
-
-            const startX = a.left;
-            const endX = b.right;
-
-            // keluar lebih jauh
-            const loopX = startX - 60;
-
-            d = `
-                M ${startX} ${startY}
-
-                L ${loopX} ${startY}
-
-                L ${loopX} ${endY}
-
-                L ${endX} ${endY}
-            `;
-
-            // tulisan ikut ke kiri
-            labelX = loopX - 40;
+        if(isDecision){
+            endX = b.centerX - OFFSET;
+            endY = b.bottom - OFFSET; 
+        } else {
+            endX = b.centerX - OFFSET; 
+            endY = b.bottom;
         }
 
-        // =====================================
-        // LOOP KANAN
-        // =====================================
-
-        else{
-
-            const startX = a.right;
-            const endX = b.left;
-
-            // keluar lebih jauh
-            const loopX = startX + 60;
-
-            d = `
-                M ${startX} ${startY}
-
-                L ${loopX} ${startY}
-
-                L ${loopX} ${endY}
-
-                L ${endX} ${endY}
-            `;
-
-            // tulisan ikut ke kanan
-            labelX = loopX + 10;
-        }
+        const d = `
+            M ${startX} ${startY}
+            L ${endX} ${startY}
+            L ${endX} ${endY}
+        `;
 
         createPath(d, 'red');
 
-        createLabel(labelX, labelY, 'Tidak', 'red');
+        createLabel(
+            endX - 40,
+            startY - 10,
+            'Tidak',
+            'red'
+        );
     }
 
     // =========================
@@ -826,6 +791,9 @@ window.addEventListener("load", () => {
         // =========================
         // FLOW DECISION
         // =========================
+        // FLOW DECISION
+        let noArrowIndex = 0;
+
         @foreach($sop->kegiatan as $index => $k)
 
             @if($k->tipe == 'decision')
@@ -835,27 +803,21 @@ window.addEventListener("load", () => {
                     $prev = $sop->kegiatan[$index - 1] ?? null;
                 @endphp
 
-                const decision{{ $k->id }} =
-                    getNode({{ $k->id }});
+                const decision{{ $k->id }} = getNode({{ $k->id }});
 
-                // YA
                 @if($next)
-
                     drawYes(
                         decision{{ $k->id }},
                         getNode({{ $next->id }})
                     );
-
                 @endif
 
-                // TIDAK
                 @if($prev)
-
                     drawNo(
                         decision{{ $k->id }},
-                        getNode({{ $prev->id }})
+                        getNode({{ $prev->id }}),
+                        noArrowIndex++
                     );
-
                 @endif
 
             @endif

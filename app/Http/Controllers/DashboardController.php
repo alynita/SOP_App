@@ -46,6 +46,8 @@ class DashboardController extends Controller
 
             'totalPelaksana' => Pelaksana::count(),
 
+            'draft' => Sop::where('status', 'draft')->count(),
+
             'disetujui' => Sop::where('status', 'disetujui')->count(),
 
             'ditolak' => Sop::where('status', 'ditolak')->count(),

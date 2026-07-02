@@ -13,28 +13,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased bg-[#f6faf7]">
+<body class="font-sans antialiased" style="margin:0; padding:0; overflow:hidden;">
 
-    <!-- BACKGROUND SOFT GREEN -->
-    <div class="fixed inset-0 overflow-hidden -z-10">
-
-        <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-200/30 rounded-full blur-3xl"></div>
-
-        <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-teal-200/20 rounded-full blur-3xl"></div>
-
-    </div>
-
-    <!-- CENTER SLOT -->
-    <div class="min-h-screen flex items-center justify-center px-4">
-
-        <!-- INI TEMPAT LOGIN KAMU -->
-        <div class="w-full sm:max-w-md">
-
-            {{ $slot }}
-
-        </div>
-
-    </div>
+    {{ $slot }}
 
 </body>
 </html>
