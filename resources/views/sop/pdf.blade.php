@@ -65,14 +65,15 @@ body{
 
 <table class="sop-table">
     <tr>
-        <td width="60%" class="text-center">
-            <img src="{{ public_path('logo.png') }}"
-            width="150">
-            <br><br>
-            <b>KEMENTERIAN KESEHATAN </b><br>
+        <td width="60%" class="text-center" style="vertical-align:middle;">
+            <div style="text-align:center;">
+                <img src="{{ public_path('logo.png') }}" width="150" style="display:block; margin:0 auto;">
+                <br>
+                <b>KEMENTERIAN KESEHATAN</b><br>
                 SEKRETARIAT JENDERAL<br>
-                PUSAT PENGEMBANGAN KOMPETENSI APARATUR (P2KA) <br>
+                PUSAT PENGEMBANGAN KOMPETENSI APARATUR (P2KA)<br>
                 BALAI BESAR PELATIHAN KESEHATAN JAKARTA
+            </div>
         </td>
         
         <td width="40%">
@@ -108,7 +109,7 @@ body{
                         <br>
 
                         <img
-                            src="{{ asset('ttd-pm.jpg') }}"
+                            src="{{ public_path('ttd-pm.jpg') }}"
                             width="50">
                         <br>
                         <b>
@@ -127,7 +128,7 @@ body{
                         Kepala BBPK Jakarta
                         <br>
                         <img
-                            src="{{ asset('ttd-kepala.jpg') }}"
+                            src="{{ public_path('ttd-kepala.jpg') }}"
                             width="50">
                         <br>
                         <b>

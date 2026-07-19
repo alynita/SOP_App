@@ -15,6 +15,7 @@ use App\Models\Pelaksana;
 use App\Models\Notification;
 
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
 
 class SopController extends Controller
 {
@@ -555,13 +556,15 @@ class SopController extends Controller
             }
         }
 
+        $namaFile = Str::slug($sop->nama_sop) . '.pdf';
+
         return Pdf::loadView(
-            'sop.pdf',
-            compact('sop', 'urutanPelaksana')
-        )
-        ->setPaper('a4', 'landscape')
-        ->download('sop.pdf');
-    }
+                    'sop.pdf',
+                    compact('sop', 'urutanPelaksana')
+                )
+                ->setPaper('a4', 'landscape')
+                ->download($namaFile);
+            }
 
     public function saveFlowchart(Request $request, $id)
     {
