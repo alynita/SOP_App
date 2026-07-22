@@ -25,7 +25,9 @@ class Sop extends Model
         'tgl_efektif',
         'disahkan_oleh',
         'status',
-        'user_id'
+        'user_id',
+        'nip',
+        'sop_induk_id'
     ];
 
     // RELASI
@@ -67,5 +69,15 @@ class Sop extends Model
     public function kegiatan()
     {
         return $this->hasMany(Kegiatan::class);
+    }
+
+    public function sopInduk()
+    {
+        return $this->belongsTo(Sop::class, 'sop_induk_id');
+    }
+
+    public function sopRevisi()
+    {
+        return $this->hasOne(Sop::class, 'sop_induk_id');
     }
 }

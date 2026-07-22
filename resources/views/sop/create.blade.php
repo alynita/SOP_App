@@ -17,8 +17,18 @@
     </div>
 @endif
 
+@if($sopLama)
+    <div class="alert alert-warning">
+        Kamu sedang membuat <b>revisi</b> dari SOP: <b>{{ $sopLama->nama_sop }}</b>
+    </div>
+@endif
+
 <form action="/sop/store" method="POST">
 @csrf
+
+@if($sopLama)
+    <input type="hidden" name="sop_induk_id" value="{{ $sopLama->id }}">
+@endif
 
 <!-- ================= DATA SOP ================= -->
 <table class="table table-bordered">
@@ -33,7 +43,8 @@
 <tr>
     <td>Nama SOP</td>
     <td>
-        <input type="text" name="nama_sop" class="form-control form-control-sm" required>
+        <input type="text" name="nama_sop" class="form-control form-control-sm"
+               value="{{ $sopLama->nama_sop ?? '' }}" required>
     </td>
 </tr>
 
@@ -65,7 +76,16 @@
 <!-- ================= DASAR HUKUM ================= -->
 <h6>Dasar Hukum</h6>
 <div id="dasar-hukum">
-    <input type="text" name="dasar_hukum[]" class="form-control form-control-sm mb-2" placeholder="Isi dasar hukum" required>
+    @forelse(($sopLama->dasarHukum ?? []) as $index => $d)
+        <div class="d-flex mb-2 gap-2">
+            <input type="text" name="dasar_hukum[]" value="{{ $d->isi }}" class="form-control form-control-sm" required>
+            @if($index > 0)
+                <button type="button" class="btn btn-danger btn-sm" onclick="hapusBaris(this)">Hapus</button>
+            @endif
+        </div>
+    @empty
+        <input type="text" name="dasar_hukum[]" class="form-control form-control-sm mb-2" placeholder="Isi dasar hukum" required>
+    @endforelse
 </div>
 <button type="button" onclick="tambah('dasar-hukum','dasar_hukum[]')" class="btn btn-secondary btn-sm mb-3">
     + Tambah
@@ -74,7 +94,16 @@
 <!-- ================= KUALIFIKASI ================= -->
 <h6>Kualifikasi Pelaksana</h6>
 <div id="kualifikasi">
-    <input type="text" name="kualifikasi[]" class="form-control form-control-sm mb-2" placeholder="Isi kualifikasi pelaksana" required>
+    @forelse(($sopLama->kualifikasis ?? []) as $index => $k)
+        <div class="d-flex mb-2 gap-2">
+            <input type="text" name="kualifikasi[]" value="{{ $k->isi }}" class="form-control form-control-sm" required>
+            @if($index > 0)
+                <button type="button" class="btn btn-danger btn-sm" onclick="hapusBaris(this)">Hapus</button>
+            @endif
+        </div>
+    @empty
+        <input type="text" name="kualifikasi[]" class="form-control form-control-sm mb-2" placeholder="Isi kualifikasi pelaksana" required>
+    @endforelse
 </div>
 <button type="button" onclick="tambah('kualifikasi','kualifikasi[]')" class="btn btn-secondary btn-sm mb-3">
     + Tambah
@@ -83,7 +112,16 @@
 <!-- ================= KETERKAITAN ================= -->
 <h6>Keterkaitan</h6>
 <div id="keterkaitan">
-    <input type="text" name="keterkaitan[]" class="form-control form-control-sm mb-2" placeholder="Isi keterkaitan" required>
+    @forelse(($sopLama->keterkaitans ?? []) as $index => $k)
+        <div class="d-flex mb-2 gap-2">
+            <input type="text" name="keterkaitan[]" value="{{ $k->isi }}" class="form-control form-control-sm" required>
+            @if($index > 0)
+                <button type="button" class="btn btn-danger btn-sm" onclick="hapusBaris(this)">Hapus</button>
+            @endif
+        </div>
+    @empty
+        <input type="text" name="keterkaitan[]" class="form-control form-control-sm mb-2" placeholder="Isi keterkaitan" required>
+    @endforelse
 </div>
 <button type="button" onclick="tambah('keterkaitan','keterkaitan[]')" class="btn btn-secondary btn-sm mb-3">
     + Tambah
@@ -92,7 +130,16 @@
 <!-- ================= PERALATAN ================= -->
 <h6>Peralatan</h6>
 <div id="peralatan">
-    <input type="text" name="peralatan[]" class="form-control form-control-sm mb-2" placeholder="Isi peralatan" required>
+    @forelse(($sopLama->peralatans ?? []) as $index => $p)
+        <div class="d-flex mb-2 gap-2">
+            <input type="text" name="peralatan[]" value="{{ $p->isi }}" class="form-control form-control-sm" required>
+            @if($index > 0)
+                <button type="button" class="btn btn-danger btn-sm" onclick="hapusBaris(this)">Hapus</button>
+            @endif
+        </div>
+    @empty
+        <input type="text" name="peralatan[]" class="form-control form-control-sm mb-2" placeholder="Isi peralatan" required>
+    @endforelse
 </div>
 <button type="button" onclick="tambah('peralatan','peralatan[]')" class="btn btn-secondary btn-sm mb-3">
     + Tambah
@@ -101,7 +148,16 @@
 <!-- ================= PERINGATAN ================= -->
 <h6>Peringatan</h6>
 <div id="peringatan">
-    <input type="text" name="peringatan[]" class="form-control form-control-sm mb-2" placeholder="Isi peringatan" required>
+    @forelse(($sopLama->peringatans ?? []) as $index => $p)
+        <div class="d-flex mb-2 gap-2">
+            <input type="text" name="peringatan[]" value="{{ $p->isi }}" class="form-control form-control-sm" required>
+            @if($index > 0)
+                <button type="button" class="btn btn-danger btn-sm" onclick="hapusBaris(this)">Hapus</button>
+            @endif
+        </div>
+    @empty
+        <input type="text" name="peringatan[]" class="form-control form-control-sm mb-2" placeholder="Isi peringatan" required>
+    @endforelse
 </div>
 <button type="button" onclick="tambah('peringatan','peringatan[]')" class="btn btn-secondary btn-sm mb-3">
     + Tambah
@@ -110,7 +166,16 @@
 <!-- ================= PENCATATAN ================= -->
 <h6>Pencatatan</h6>
 <div id="pencatatan">
-    <input type="text" name="pencatatan[]" class="form-control form-control-sm mb-2" placeholder="Isi pencatatan" required>
+    @forelse(($sopLama->pencatatans ?? []) as $index => $p)
+        <div class="d-flex mb-2 gap-2">
+            <input type="text" name="pencatatan[]" value="{{ $p->isi }}" class="form-control form-control-sm" required>
+            @if($index > 0)
+                <button type="button" class="btn btn-danger btn-sm" onclick="hapusBaris(this)">Hapus</button>
+            @endif
+        </div>
+    @empty
+        <input type="text" name="pencatatan[]" class="form-control form-control-sm mb-2" placeholder="Isi pencatatan" required>
+    @endforelse
 </div>
 <button type="button" onclick="tambah('pencatatan','pencatatan[]')" class="btn btn-secondary btn-sm mb-3">
     + Tambah

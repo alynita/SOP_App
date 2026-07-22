@@ -159,6 +159,10 @@
                     🗂 Arsip SOP
                 </a>
 
+                <a href="/timker4/dokumen-kadaluarsa">
+                    ⏳ Dokumen Kadaluarsa
+                </a>
+
             @endif
 
         @endif

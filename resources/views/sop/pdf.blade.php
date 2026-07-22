@@ -97,26 +97,6 @@ body{
                     <td>Tgl. Efektif</td>
                     <td>: {{ $sop->tgl_efektif }}</td>
                 </tr>
-
-                <tr>
-                    <td>Disetujui Oleh</td>
-                    <td>:</td>
-                </tr>
-
-                <tr>
-                    <td colspan="2" class="text-center">
-                        Penjaminan Mutu
-                        <br>
-
-                        <img
-                            src="{{ public_path('ttd-pm.jpg') }}"
-                            width="50">
-                        <br>
-                        <b>
-                            {{ $sop->timker_approved_by ?? '-' }}
-                        </b>
-                    </td>
-                </tr>
                 
                 <tr>
                     <td>Disahkan Oleh</td>

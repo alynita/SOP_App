@@ -149,48 +149,6 @@
                             <td>: {{ $sop->tgl_efektif }}</td>
                         </tr>
 
-                        <!-- ================= TIMKER 4 ================= -->
-                        <tr>
-                            <td>Disetujui</td>
-                            <td>:</td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="2" class="text-center">
-
-                                Penjaminan Mutu
-
-                                <br><br>
-
-                                @if($sop->status == 'disetujui' || $sop->status == 'disahkan')
-
-                                    <img
-                                        src="{{ asset('ttd-pm.jpg') }}"
-                                        width="120">
-
-                                    <br>
-
-                                    <b>{{ $sop->timker_approved_by ?? '-' }}</b>
-
-                                    <br>
-
-                                    <small>
-                                        {{ $sop->timker_approved_at ?? '-' }}
-                                    </small>
-
-                                @else
-
-                                    <br><br>
-
-                                    <em style="color:red;">
-                                        Menunggu persetujuan Timker 4
-                                    </em>
-
-                                @endif
-
-                            </td>
-                        </tr>
-
                         <tr>
                             <td>Disahkan oleh</td>
                             <td>:</td>
@@ -215,7 +173,7 @@
 
                                     <br>
 
-                                    NIP. {{ $sop->nip_pengesah }}
+                                    NIP. {{ $sop->nip_pengesah ?? '-'}}
 
                                 @else
 

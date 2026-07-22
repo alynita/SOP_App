@@ -17,32 +17,32 @@
     <label>Nama Kegiatan</label>
 
     <textarea
-        name="nama_kegiatan[]"
+        name="nama_kegiatan[{{ $i }}]"
         class="form-control mb-2"
         placeholder="Input Nama Kegiatan">{{ $k->nama_kegiatan }}</textarea>
 
     <!-- MUTU BAKU -->
     <input type="text"
-        name="kelengkapan[]"
+        name="kelengkapan[{{ $i }}]"
         value="{{ $k->kelengkapan }}"
         class="form-control mb-2"
         placeholder="Kelengkapan (opsional)">
 
     <input type="text"
-        name="waktu[]"
+        name="waktu[{{ $i }}]"
         value="{{ $k->waktu }}"
         class="form-control mb-2"
         placeholder="Waktu (opsional)">
 
     <input type="text"
-        name="output[]"
+        name="output[{{ $i }}]"
         value="{{ $k->output }}"
         class="form-control mb-2"
         placeholder="Output (opsional)">
 
     <!-- KETERANGAN -->
     <textarea
-        name="keterangan[]"
+        name="keterangan[{{ $i }}]"
         class="form-control mb-2"
         placeholder="Keterangan tambahan">{{ $k->keterangan }}</textarea>
 
@@ -171,9 +171,30 @@ function tambah(){
 
     let item = document.querySelector('.item').cloneNode(true);
 
-    // RESET TEXT & TEXTAREA
-    item.querySelectorAll('input[type="text"], textarea')
-        .forEach(el => el.value = '');
+    // RESET & rename nama_kegiatan
+    let namaKegiatan = item.querySelector('textarea[name^="nama_kegiatan"]');
+    namaKegiatan.name = "nama_kegiatan["+index+"]";
+    namaKegiatan.value = '';
+
+    // RESET & rename kelengkapan
+    let kelengkapan = item.querySelector('input[name^="kelengkapan"]');
+    kelengkapan.name = "kelengkapan["+index+"]";
+    kelengkapan.value = '';
+
+    // RESET & rename waktu
+    let waktu = item.querySelector('input[name^="waktu"]');
+    waktu.name = "waktu["+index+"]";
+    waktu.value = '';
+
+    // RESET & rename output
+    let output = item.querySelector('input[name^="output"]');
+    output.name = "output["+index+"]";
+    output.value = '';
+
+    // RESET & rename keterangan
+    let keterangan = item.querySelector('textarea[name^="keterangan"]');
+    keterangan.name = "keterangan["+index+"]";
+    keterangan.value = '';
 
     // BERSIHKAN Tom Select hasil clone
     item.querySelectorAll('.ts-wrapper').forEach(el => el.remove());

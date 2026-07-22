@@ -39,11 +39,10 @@ class SopController extends Controller
 
         $sops = Sop::where('user_id', $userId)
             ->where('status', '!=', 'disahkan')
+            ->where('status', '!=', 'kadaluarsa')
             ->latest()
             ->take(5)
             ->get();
-
-                    
 
         // 🔔 AMBIL NOTIF (hanya yang belum dibaca)
         $notifications = Notification::where('user_id', auth()->id())
@@ -66,7 +65,17 @@ class SopController extends Controller
 
     public function create()
     {
-        return view('sop.create');
+        return view('sop.create', ['sopLama' => null]);
+    }
+
+    public function revisi($id)
+    {
+        $sopLama = Sop::with([
+            'dasarHukum', 'kualifikasis', 'keterkaitans',
+            'peralatans', 'peringatans', 'pencatatans'
+        ])->findOrFail($id);
+
+        return view('sop.create', compact('sopLama'));
     }
 
     public function store(Request $request)
@@ -172,12 +181,42 @@ class SopController extends Controller
             ]);
         }
 
-        return redirect('/sop/' . $sop->id)
+        // ======================
+        // COPY KEGIATAN (KALAU INI HASIL REVISI)
+        // ======================
+        if ($sop->sop_induk_id) {
+
+            $kegiatanLama = Kegiatan::where('sop_id', $sop->sop_induk_id)
+                ->with('pelaksana')
+                ->orderBy('no_urutan')
+                ->get();
+
+            foreach ($kegiatanLama as $k) {
+
+                $kegiatanBaru = Kegiatan::create([
+                    'sop_id'        => $sop->id,
+                    'no_urutan'     => $k->no_urutan,
+                    'nama_kegiatan' => $k->nama_kegiatan,
+                    'kelengkapan'   => $k->kelengkapan,
+                    'waktu'         => $k->waktu,
+                    'output'        => $k->output,
+                    'keterangan'    => $k->keterangan,
+                    'tipe'          => $k->tipe,
+                ]);
+
+                $kegiatanBaru->pelaksana()->sync(
+                    $k->pelaksana->pluck('id')
+                );
+            }
+        }
+
+        return redirect('/sop/' . $sop->id . '/edit')
                 ->with('success', 'SOP berhasil disimpan');
     }
 
     // ========================
     // OUTPUT FINAL
+    // ========================
     public function show($id)
     {
         $sop = Sop::with([
@@ -208,6 +247,7 @@ class SopController extends Controller
         $userId = auth()->id(); 
 
         $sops = Sop::where('user_id', $userId)
+                    ->where('status', '!=', 'kadaluarsa')
                     ->where(function ($query) use ($search) {
                         $query->where('nama_sop', 'like', "%$search%")
                             ->orWhere('no_sop', 'like', "%$search%");
@@ -243,24 +283,23 @@ class SopController extends Controller
     {
         $sop = Sop::findOrFail($id);
 
-        // hapus lama
         $sop->kegiatan()->delete();
 
-        // input ulang
+        $urutan = 1;
+
         foreach($request->nama_kegiatan as $i => $nama){
 
             $kegiatan = Kegiatan::create([
                 'sop_id' => $sop->id,
-                'no_urutan' => $i + 1,
+                'no_urutan' => $urutan++,
                 'nama_kegiatan' => $nama,
                 'kelengkapan' => $request->kelengkapan[$i] ?? null,
                 'waktu' => $request->waktu[$i] ?? null,
                 'output' => $request->output[$i] ?? null,
                 'keterangan' => $request->keterangan[$i] ?? null,
-                'tipe' => $request->tipe[$i],
+                'tipe' => $request->tipe[$i] ?? 'proses',
             ]);
 
-            // pelaksana lama
             if(isset($request->pelaksana[$i])){
                 $kegiatan->pelaksana()->attach(
                     $request->pelaksana[$i]

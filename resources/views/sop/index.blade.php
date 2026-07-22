@@ -30,6 +30,13 @@
                 Detail
             </a>
 
+            @if($sop->status === 'disahkan')
+                <a href="/sop/{{ $sop->id }}/revisi"
+                class="btn btn-warning btn-sm">
+                    Revisi
+                </a>
+            @endif
+
             <a href="/sop/{{ $sop->id }}/pdf"
             class="btn btn-success btn-sm">
                 PDF

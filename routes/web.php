@@ -117,6 +117,10 @@ Route::middleware(['auth'])->group(function () {
     // 🔥 Input SOP 
     Route::get('/sop/create', [SopController::class, 'create']);
     Route::post('/sop/store', [SopController::class, 'store']);
+    Route::get('/sop/{id}/revisi', [SopController::class, 'revisi']);
+
+    // 🔥 Ambil data SOP buat auto-isi form revisi
+    Route::get('/sop/{id}/data-json', [SopController::class, 'dataJson']);
 
     // List SOP
     Route::get('/sop', [SopController::class, 'index']);
@@ -169,6 +173,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/sop/{id}/reject', [DashboardController::class, 'reject']);
     Route::get('/timker4/revisi',[DashboardController::class, 'revisi']);
     Route::get('/timker4/arsip', [DashboardController::class, 'arsip']);
+
+    Route::get('/timker4/dokumen-kadaluarsa', function () {
+
+        if(auth()->user()->role != 'timker4'){
+            abort(403);
+        }
+
+        return app(DashboardController::class)->dokumenKadaluarsa();
+
+    });
 
     /*
     |------------------------------------------

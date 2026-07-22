@@ -132,11 +132,21 @@ class DashboardController extends Controller
 
     public function arsip()
     {
-        $arsip = Sop::whereIn('status', ['disetujui', 'ditolak'])
+        $arsip = Sop::whereIn('status', ['disetujui', 'ditolak', 'disahkan'])
             ->latest()
             ->get();
 
         return view('dashboard.arsip', compact('arsip'));
+    }
+
+    public function dokumenKadaluarsa()
+    { 
+        $sops = Sop::where('status', 'kadaluarsa')
+            ->with('sopRevisi') // biar bisa nampilin "digantikan oleh SOP mana"
+            ->latest()
+            ->get();
+
+        return view('dashboard.dokumen-kadaluarsa', compact('sops'));
     }
 
     public function dashboardKepala()
@@ -192,9 +202,34 @@ class DashboardController extends Controller
 
         Notification::create([
             'user_id' => $sop->user_id,
-            'pesan' => 'SOP kamu telah disahkan.',
+            'pesan' => 'SOP "' . $sop->nama_sop . '" telah disahkan.',
             'url' => '/sop/' . $sop->id
         ]);
+
+        // ======================
+        // TRIGGER: SOP LAMA JADI KADALUARSA
+        // ======================
+        if ($sop->sop_induk_id) {
+
+            $sopLama = Sop::find($sop->sop_induk_id);
+
+            if ($sopLama) {
+
+                $sopLama->status = 'kadaluarsa';
+                $sopLama->save();
+
+                // notifikasi ke Timker 4 (opsional, bisa dihapus kalau belum perlu)
+                $timker4Users = User::where('role', 'timker4')->get();
+
+                foreach ($timker4Users as $t4) {
+                    Notification::create([
+                        'user_id' => $t4->id,
+                        'pesan' => 'SOP "' . $sopLama->nama_sop . '" telah digantikan oleh versi revisi terbaru dan dipindahkan ke Dokumen Kadaluarsa.',
+                        'url' => '/timker4/dokumen-kadaluarsa'
+                    ]);
+                }
+            }
+        }
 
         return back()->with(
             'success',
